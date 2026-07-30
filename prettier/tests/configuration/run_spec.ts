@@ -107,7 +107,7 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
     expect(output).toContain("none");
     expect(output).not.toMatch(/\bnull\b/);
   },
-  "media-post-conditional-html.html": (output) => {
+  "conditional-html-nested-expression.html": (output) => {
     expect(output).toContain("</main>");
     expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
   },
