@@ -93,7 +93,14 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "conditional-html-wrapper-closing.html",
   "from-import-and-separator.html",
   "nested-multiline-funcall.html",
+  "module-attribute-svg-preserve.html",
 ]);
+
+const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
+  "module-attribute-svg-preserve.html": (output) => {
+    expect(output).not.toMatch(/\{%-?\s*(end)?preserve/i);
+  },
+};
 
 async function run_spec(dirName, options) {
   const testObjects = fs
@@ -115,6 +122,12 @@ async function run_spec(dirName, options) {
         const firstPass = await prettyprint(input, mergedOptions);
         const secondPass = await prettyprint(firstPass, mergedOptions);
         expect(secondPass).toBe(firstPass);
+      });
+    }
+    if (REGRESSION_ASSERTIONS[fileName]) {
+      it(`formats ${fileName} with regression assertions`, async () => {
+        const output = await prettyprint(input, mergedOptions);
+        REGRESSION_ASSERTIONS[fileName](output);
       });
     }
   });

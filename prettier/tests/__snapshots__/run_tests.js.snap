@@ -2005,6 +2005,26 @@ What is this element?
 
 `;
 
+exports[`formats module-attribute-svg-preserve.html correctly 1`] = `
+{% email_subscriptions_confirmation "email_subscriptions_confirmation"
+  path='@hubspot/email_subscriptions_confirmation'
+  label='Subscriptions Update Confirmation',
+  header='Communication Preferences',
+  unsubscribe_all_success='<svg class="cl-icon"><use href="#cl-icon-check-circle" /></svg><h1>You have successfully unsubscribed from all email communications.</h1>',
+  subscription_update_success='<svg class="cl-icon"><use href="#cl-icon-check-circle" /></svg><h1>You have successfully updated your email preferences.</h1>',
+  subheader_text='<p>If this is not your email address, please ignore this page since the email associated with this page was most likely forwarded to you.</p>',
+%}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% email_subscriptions_confirmation "email_subscriptions_confirmation"
+  path="@hubspot/email_subscriptions_confirmation",
+  label="Subscriptions Update Confirmation",
+  header="Communication Preferences",
+  unsubscribe_all_success="<svg class=\\"cl-icon\\"><use href=\\"#cl-icon-check-circle\\" /></svg><h1>You have successfully unsubscribed from all email communications.</h1>",
+  subscription_update_success="<svg class=\\"cl-icon\\"><use href=\\"#cl-icon-check-circle\\" /></svg><h1>You have successfully updated your email preferences.</h1>",
+  subheader_text="<p>If this is not your email address, please ignore this page since the email associated with this page was most likely forwarded to you.</p>" %}
+
+`;
+
 exports[`formats namespace-attribute-assignment.html correctly 1`] = `
 {%- macro findMatchingOption(value, options) -%}
   {%- set normalized_value = value|lower|trim -%}

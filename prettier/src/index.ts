@@ -69,11 +69,47 @@ const isInsidePreserveBlock = (fullText: string, matchOffset: number) => {
   return lastPreserve !== -1 && lastPreserve > lastEndPreserve;
 };
 
+/**
+ * True when `matchOffset` falls inside a quoted string literal within an
+ * unclosed `{% ... %}` HubL tag (e.g. module attribute values). SVG markup
+ * there must not be wrapped in `{% preserve %}` — it is not real HTML.
+ */
+const isInsideHubLTagStringLiteral = (
+  fullText: string,
+  matchOffset: number,
+): boolean => {
+  const before = fullText.slice(0, matchOffset);
+  const lastOpen = before.lastIndexOf("{%");
+  const lastClose = before.lastIndexOf("%}");
+
+  if (lastOpen === -1 || lastClose > lastOpen) {
+    return false;
+  }
+
+  const tagContent = before.slice(lastOpen);
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+
+  for (let index = 2; index < tagContent.length; index++) {
+    const character = tagContent[index];
+    if (character === "'" && !inDoubleQuote) {
+      inSingleQuote = !inSingleQuote;
+    } else if (character === '"' && !inSingleQuote) {
+      inDoubleQuote = !inDoubleQuote;
+    }
+  }
+
+  return inSingleQuote || inDoubleQuote;
+};
+
 const wrapSvgWithPreserve = (input: string): string => {
   return input.replace(
     SVG_ELEMENT_WITH_LEADING_WHITESPACE_REGEX,
     (match, offset, fullText) => {
       if (isInsidePreserveBlock(fullText, offset)) {
+        return match;
+      }
+      if (isInsideHubLTagStringLiteral(fullText, offset)) {
         return match;
       }
       return `{% preserve %}${match}{% endpreserve %}`;
