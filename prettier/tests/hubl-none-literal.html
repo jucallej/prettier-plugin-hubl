@@ -1,5 +1,5 @@
-{% set publisherLogo = none %}
-{% set videoData = {
-  'title': card.title,
-  'thumbnail': card.featured_image.src if card.featured_image else none
+{% set logo = none %}
+{% set item = {
+  'name': card.name,
+  'image': card.image if card.image else none
 } %}

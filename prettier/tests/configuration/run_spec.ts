@@ -96,7 +96,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "module-attribute-svg-preserve.html",
   "hubl-none-literal.html",
   "json-ld-hubl-conditional.html",
-  "media-post-conditional-html.html",
+  "conditional-html-nested-expression.html",
 ]);
 
 const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {

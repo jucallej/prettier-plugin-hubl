@@ -1290,16 +1290,16 @@ screenshotPath: ../images/template-previews/hubdb.png
 `;
 
 exports[`formats hubl-none-literal.html correctly 1`] = `
-{% set publisherLogo = none %}
-{% set videoData = {
-  'title': card.title,
-  'thumbnail': card.featured_image.src if card.featured_image else none
+{% set logo = none %}
+{% set item = {
+  'name': card.name,
+  'image': card.image if card.image else none
 } %}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-{% set publisherLogo = none %}
-{% set videoData = {
-  "title": card.title,
-  "thumbnail": card.featured_image.src if card.featured_image else none
+{% set logo = none %}
+{% set item = {
+  "name": card.name,
+  "image": card.image if card.image else none
 } %}
 
 `;
@@ -1421,30 +1421,20 @@ exports[`formats json.html correctly 1`] = `
 exports[`formats json-ld-hubl-conditional.html correctly 1`] = `
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "name": "{{ siteName }}"{% if publisherName %},
-  "publisher": {
-    "@type": "Organization",
-    "name": "{{ publisherName }}"{% if publisherLogo %},
-    "logo": {
-      "@type": "ImageObject",
-      "url": "{{ publisherLogo }}"
-    }{% endif %}
+  "name": "{{ name }}"{% if org %},
+  "org": {
+    "name": "{{ org }}"{% if logo %},
+    "logo": { "url": "{{ logo }}" }{% endif %}
   }{% endif %}
 }
 </script>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "name": "{{ siteName }}"{% if publisherName %},
-  "publisher": {
-    "@type": "Organization",
-    "name": "{{ publisherName }}"{% if publisherLogo %},
-    "logo": {
-      "@type": "ImageObject",
-      "url": "{{ publisherLogo }}"
-    }{% endif %}
+  "name": "{{ name }}"{% if org %},
+  "org": {
+    "name": "{{ org }}"{% if logo %},
+    "logo": { "url": "{{ logo }}" }{% endif %}
   }{% endif %}
 }
 </script>
@@ -1531,69 +1521,65 @@ exports[`formats landing-page.html correctly 1`] = `
 
 exports[`formats media-post-conditional-html.html correctly 1`] = `
 {% block body %}
-<main data-monitor="media-brand-post-body">
-  <div class="content-wrapper">
-    <div id="blog-page-read-time" class="blog-post">
-      {% if isPillarType %}
-        {% module "pillar_blog_post_header" path="/modules/pillar-post-header", label="Pillar Post Header" %}
+<main>
+  <div class="wrap">
+    <div class="post">
+      {% if useSimple %}
+        {% module "header" path="/modules/header" %}
       {% else %}
-      <div class="cl-page-width">
-        <section class="blog-media-header blog-media-post-header">
-          <h1 class="blog-media-header-title">{{ content.title }}</h1>
-          {% if postHeaderSubtitle %}
-            <h2 class="blog-media-header-subtitle">{{ postHeaderSubtitle }}</h2>
+      <div>
+        <section>
+          <h1>{{ title }}</h1>
+          {% if subtitle %}
+            <h2>{{ subtitle }}</h2>
           {% endif %}
         </section>
       </div>
       {% endif %}
-      <div class="hsg-rich-text blog-post-body media-post-body">
-        <div class="hsg-rich-text__wrapper">
-          {% if embed_featured_image %}
-            {{ postBody|replace('</p>', '</p><div class="blog-post-body-featured-image"><img src="{{ resize_image_url(content.featured_image, 524, 393) }}" alt="{{ featuredImageAlt }}" width="524" height="393" /></div>', 1) }}
+      <div class="body">
+        <div class="inner">
+          {% if showImage %}
+            {{ body|replace('</p>', '</p><div><img src="{{ image_url }}" alt="{{ alt }}" /></div>', 1) }}
           {% else %}
-            {{ postBody }}
+            {{ body }}
           {% endif %}
         </div>
       </div>
     </div>
   </div>
 </main>
-{% module "media_exit_intent_popup" path="/modules/media-exit-intent-popup", label="Media Exit Intent Popup" %}
+{% module "overlay" path="/modules/overlay" %}
 {% endblock %}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 {% block body %}
-  <main data-monitor="media-brand-post-body">
-    <div class="content-wrapper">
-      <div id="blog-page-read-time" class="blog-post">
-        {% if isPillarType %}
-          {% module "pillar_blog_post_header"
-            path="/modules/pillar-post-header",
-            label="Pillar Post Header" %}
+  <main>
+    <div class="wrap">
+      <div class="post">
+        {% if useSimple %}
+          {% module "header" path="/modules/header" %}
         {% else %}
-          <div class="cl-page-width">
-            <section class="blog-media-header blog-media-post-header">
-              <h1 class="blog-media-header-title">{{ content.title }}</h1>
-              {% if postHeaderSubtitle %}
-                <h2 class="blog-media-header-subtitle">{{ postHeaderSubtitle }}</h2>
+          <div>
+            <section>
+              <h1>{{ title }}</h1>
+              {% if subtitle %}
+                <h2>{{ subtitle }}</h2>
               {% endif %}
             </section>
           </div>
         {% endif %}
-        <div class="hsg-rich-text blog-post-body media-post-body">
-          <div class="hsg-rich-text__wrapper">
-            {% if embed_featured_image %}
-              {{ postBody|replace("</p>", "</p><div class=\\"blog-post-body-featured-image\\"><img src=\\"{{ resize_image_url(content.featured_image, 524, 393) }}\\" alt=\\"{{ featuredImageAlt }}\\" width=\\"524\\" height=\\"393\\" /></div>", 1) }}
+        <div class="body">
+          <div class="inner">
+            {% if showImage %}
+              {{ body|replace("</p>", "</p><div><img src=\\"{{ image_url }}\\" alt=\\"{{ alt }}\\" /></div>", 1) }}
             {% else %}
-              {{ postBody }}
+              {{ body }}
             {% endif %}
           </div>
         </div>
       </div>
     </div>
   </main>
-  {% module "media_exit_intent_popup"
-    path="/modules/media-exit-intent-popup",
-    label="Media Exit Intent Popup" %}
+  {% module "overlay" path="/modules/overlay" %}
 {% endblock body %}
 
 `;
@@ -2116,22 +2102,11 @@ What is this element?
 `;
 
 exports[`formats module-attribute-svg-preserve.html correctly 1`] = `
-{% email_subscriptions_confirmation "email_subscriptions_confirmation"
-  path='@hubspot/email_subscriptions_confirmation'
-  label='Subscriptions Update Confirmation',
-  header='Communication Preferences',
-  unsubscribe_all_success='<svg class="cl-icon"><use href="#cl-icon-check-circle" /></svg><h1>You have successfully unsubscribed from all email communications.</h1>',
-  subscription_update_success='<svg class="cl-icon"><use href="#cl-icon-check-circle" /></svg><h1>You have successfully updated your email preferences.</h1>',
-  subheader_text='<p>If this is not your email address, please ignore this page since the email associated with this page was most likely forwarded to you.</p>',
+{% module "example"
+  html='<svg><use href="#icon" /></svg><h1>Done</h1>',
 %}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-{% email_subscriptions_confirmation "email_subscriptions_confirmation"
-  path="@hubspot/email_subscriptions_confirmation",
-  label="Subscriptions Update Confirmation",
-  header="Communication Preferences",
-  unsubscribe_all_success="<svg class=\\"cl-icon\\"><use href=\\"#cl-icon-check-circle\\" /></svg><h1>You have successfully unsubscribed from all email communications.</h1>",
-  subscription_update_success="<svg class=\\"cl-icon\\"><use href=\\"#cl-icon-check-circle\\" /></svg><h1>You have successfully updated your email preferences.</h1>",
-  subheader_text="<p>If this is not your email address, please ignore this page since the email associated with this page was most likely forwarded to you.</p>" %}
+{% module "example" html="<svg><use href=\\"#icon\\" /></svg><h1>Done</h1>" %}
 
 `;
 

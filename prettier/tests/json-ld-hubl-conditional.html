@@ -1,14 +1,9 @@
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "name": "{{ siteName }}"{% if publisherName %},
-  "publisher": {
-    "@type": "Organization",
-    "name": "{{ publisherName }}"{% if publisherLogo %},
-    "logo": {
-      "@type": "ImageObject",
-      "url": "{{ publisherLogo }}"
-    }{% endif %}
+  "name": "{{ name }}"{% if org %},
+  "org": {
+    "name": "{{ org }}"{% if logo %},
+    "logo": { "url": "{{ logo }}" }{% endif %}
   }{% endif %}
 }
 </script>
