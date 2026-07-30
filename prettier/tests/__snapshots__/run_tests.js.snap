@@ -1529,6 +1529,75 @@ exports[`formats landing-page.html correctly 1`] = `
 
 `;
 
+exports[`formats media-post-conditional-html.html correctly 1`] = `
+{% block body %}
+<main data-monitor="media-brand-post-body">
+  <div class="content-wrapper">
+    <div id="blog-page-read-time" class="blog-post">
+      {% if isPillarType %}
+        {% module "pillar_blog_post_header" path="/modules/pillar-post-header", label="Pillar Post Header" %}
+      {% else %}
+      <div class="cl-page-width">
+        <section class="blog-media-header blog-media-post-header">
+          <h1 class="blog-media-header-title">{{ content.title }}</h1>
+          {% if postHeaderSubtitle %}
+            <h2 class="blog-media-header-subtitle">{{ postHeaderSubtitle }}</h2>
+          {% endif %}
+        </section>
+      </div>
+      {% endif %}
+      <div class="hsg-rich-text blog-post-body media-post-body">
+        <div class="hsg-rich-text__wrapper">
+          {% if embed_featured_image %}
+            {{ postBody|replace('</p>', '</p><div class="blog-post-body-featured-image"><img src="{{ resize_image_url(content.featured_image, 524, 393) }}" alt="{{ featuredImageAlt }}" width="524" height="393" /></div>', 1) }}
+          {% else %}
+            {{ postBody }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% module "media_exit_intent_popup" path="/modules/media-exit-intent-popup", label="Media Exit Intent Popup" %}
+{% endblock %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% block body %}
+  <main data-monitor="media-brand-post-body">
+    <div class="content-wrapper">
+      <div id="blog-page-read-time" class="blog-post">
+        {% if isPillarType %}
+          {% module "pillar_blog_post_header"
+            path="/modules/pillar-post-header",
+            label="Pillar Post Header" %}
+        {% else %}
+          <div class="cl-page-width">
+            <section class="blog-media-header blog-media-post-header">
+              <h1 class="blog-media-header-title">{{ content.title }}</h1>
+              {% if postHeaderSubtitle %}
+                <h2 class="blog-media-header-subtitle">{{ postHeaderSubtitle }}</h2>
+              {% endif %}
+            </section>
+          </div>
+        {% endif %}
+        <div class="hsg-rich-text blog-post-body media-post-body">
+          <div class="hsg-rich-text__wrapper">
+            {% if embed_featured_image %}
+              {{ postBody|replace("</p>", "</p><div class=\\"blog-post-body-featured-image\\"><img src=\\"{{ resize_image_url(content.featured_image, 524, 393) }}\\" alt=\\"{{ featuredImageAlt }}\\" width=\\"524\\" height=\\"393\\" /></div>", 1) }}
+            {% else %}
+              {{ postBody }}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  {% module "media_exit_intent_popup"
+    path="/modules/media-exit-intent-popup",
+    label="Media Exit Intent Popup" %}
+{% endblock body %}
+
+`;
+
 exports[`formats membership-login.html correctly 1`] = `
 <!--
   templateType: membership_login_page

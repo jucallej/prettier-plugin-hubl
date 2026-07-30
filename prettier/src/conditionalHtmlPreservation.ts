@@ -38,9 +38,6 @@ const HUBL_CONTROL_TAG_REGEX = /\{%-?\s*(if|elif|else|endif)\b[^%]*?-?%\}/g;
 /** HubL block tags (`{% ... %}`) — stripped before HTML tag-balance counting. */
 const HUBL_BLOCK_TAG_REGEX = /\{%.+?%\}/gs;
 
-/** HubL variables (`{{ ... }}`) — stripped before HTML tag-balance counting. */
-const HUBL_VARIABLE_REGEX = /\{\{.+?\}\}/gs;
-
 /** HubL comments (`{# ... #}`) — stripped before HTML tag-balance counting. */
 const HUBL_COMMENT_REGEX = /\{#.*?#\}/gs;
 
@@ -70,12 +67,62 @@ const isSelfClosingHtmlTag = (tag: string): boolean => {
   return SELF_CLOSING_HTML_TAG_REGEX.test(tag);
 };
 
+/**
+ * Returns the index immediately after a `{{ ... }}` expression, correctly
+ * handling nested `{{ }}` pairs inside filter arguments.
+ */
+const indexAfterHubLExpression = (text: string, startIndex: number): number => {
+  if (!text.startsWith("{{", startIndex)) {
+    return startIndex;
+  }
+
+  let index = startIndex + 2;
+  let depth = 1;
+
+  while (index < text.length && depth > 0) {
+    if (text.startsWith("{{", index)) {
+      depth++;
+      index += 2;
+      continue;
+    }
+
+    if (text.startsWith("}}", index)) {
+      depth--;
+      index += 2;
+      continue;
+    }
+
+    index++;
+  }
+
+  return index;
+};
+
+/** Removes `{{ ... }}` expressions, including nested pairs inside filter args. */
+const stripHubLExpressions = (fragment: string): string => {
+  let output = "";
+  let index = 0;
+
+  while (index < fragment.length) {
+    if (fragment.startsWith("{{", index)) {
+      index = indexAfterHubLExpression(fragment, index);
+      continue;
+    }
+
+    output += fragment[index];
+    index++;
+  }
+
+  return output;
+};
+
 /** Removes HubL syntax so only literal HTML remains for tag-balance counting. */
 const stripHubL = (fragment: string): string =>
-  fragment
-    .replace(HUBL_BLOCK_TAG_REGEX, "")
-    .replace(HUBL_VARIABLE_REGEX, "")
-    .replace(HUBL_COMMENT_REGEX, "");
+  stripHubLExpressions(
+    fragment
+      .replace(HUBL_BLOCK_TAG_REGEX, "")
+      .replace(HUBL_COMMENT_REGEX, ""),
+  );
 
 /**
  * Net open HTML tag count in `fragment`, ignoring HubL and void/self-closing
@@ -236,8 +283,7 @@ const findContainerCloseEnd = (text: string, openStart: number): number => {
     }
 
     if (remaining.startsWith("{{")) {
-      const expressionEnd = remaining.indexOf("}}");
-      index += expressionEnd === -1 ? 2 : expressionEnd + 2;
+      index = indexAfterHubLExpression(text, index);
       continue;
     }
 
@@ -316,8 +362,7 @@ const findPreserveEnd = (
     }
 
     if (remaining.startsWith("{{")) {
-      const expressionEnd = remaining.indexOf("}}");
-      index += expressionEnd === -1 ? 2 : expressionEnd + 2;
+      index = indexAfterHubLExpression(text, index);
       continue;
     }
 
@@ -347,6 +392,14 @@ const findPreserveEnd = (
 
   if (balance > 0) {
     return findContainerCloseEnd(text, preserveStart);
+  }
+
+  const openTagMatch = text.slice(preserveStart).match(/^<([a-zA-Z][\w-]*)[^>]*>/);
+  if (openTagMatch) {
+    const containerCloseEnd = findContainerCloseEnd(text, preserveStart);
+    if (containerCloseEnd > index) {
+      return containerCloseEnd;
+    }
   }
 
   return index;

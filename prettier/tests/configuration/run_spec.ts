@@ -96,6 +96,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "module-attribute-svg-preserve.html",
   "hubl-none-literal.html",
   "json-ld-hubl-conditional.html",
+  "media-post-conditional-html.html",
 ]);
 
 const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
@@ -105,6 +106,10 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
   "hubl-none-literal.html": (output) => {
     expect(output).toContain("none");
     expect(output).not.toMatch(/\bnull\b/);
+  },
+  "media-post-conditional-html.html": (output) => {
+    expect(output).toContain("</main>");
+    expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
   },
 };
 
