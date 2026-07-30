@@ -375,7 +375,7 @@ function printHubl(node) {
     }
     case "Literal":
       if (node.value === null) {
-        return "null";
+        return "none";
       }
       if (typeof node.value === "string") {
         return util.makeString(node.value, '"');

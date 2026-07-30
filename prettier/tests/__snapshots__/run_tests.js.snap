@@ -1296,6 +1296,21 @@ screenshotPath: ../images/template-previews/hubdb.png
 
 `;
 
+exports[`formats hubl-none-literal.html correctly 1`] = `
+{% set publisherLogo = none %}
+{% set videoData = {
+  'title': card.title,
+  'thumbnail': card.featured_image.src if card.featured_image else none
+} %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% set publisherLogo = none %}
+{% set videoData = {
+  "title": card.title,
+  "thumbnail": card.featured_image.src if card.featured_image else none
+} %}
+
+`;
+
 exports[`formats idempotent-dict-ternary.html correctly 1`] = `
 {% set offersCtaLanguage = {
   "en": "Download for free",

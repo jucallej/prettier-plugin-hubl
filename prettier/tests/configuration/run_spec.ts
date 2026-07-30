@@ -94,11 +94,16 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "from-import-and-separator.html",
   "nested-multiline-funcall.html",
   "module-attribute-svg-preserve.html",
+  "hubl-none-literal.html",
 ]);
 
 const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
   "module-attribute-svg-preserve.html": (output) => {
     expect(output).not.toMatch(/\{%-?\s*(end)?preserve/i);
+  },
+  "hubl-none-literal.html": (output) => {
+    expect(output).toContain("none");
+    expect(output).not.toMatch(/\bnull\b/);
   },
 };
 
