@@ -29,6 +29,7 @@ const Token = {
   comment: (index: number) => `<!--${index}-->`,
   placeholder: (index: number) => `<!--placeholder-${index}-->`,
   svgBlock: (index: number) => `<!--svgblock-${index}-->`,
+  scriptBlock: (index: number) => `<!--scriptblock-${index}-->`,
   conditionalBlock: (index: number) => `<!--conditionalblock-${index}-->`,
   jsonBlock: (match: string) => `{% json_block %}${match}{% end_json_block %}`,
 };
@@ -46,6 +47,32 @@ const SVG_ELEMENT_REGEX = /<svg\b[\s\S]*?<\/svg>/gim;
 // <div>) is folded into the Preserve node's value instead of being lost.
 const SVG_ELEMENT_WITH_LEADING_WHITESPACE_REGEX =
   /[ \t]*<svg\b[\s\S]*?<\/svg>/gim;
+
+const SCRIPT_BLOCK_WITH_HUBL_REGEX =
+  /<script\b[^>]*>[\s\S]*?(?:{%|{{)[\s\S]*?<\/script>/gim;
+
+const SCRIPT_BLOCK_WITH_LEADING_WHITESPACE_REGEX =
+  /[ \t]*<script\b[^>]*>[\s\S]*?<\/script>/gim;
+
+/**
+ * Replaces entire `<script>...</script>` blocks that contain HubL with a
+ * placeholder before the HTML formatting pass. Without this, Prettier's HTML
+ * formatter re-indents JSON-LD around embedded `{% if %}` tags on every run,
+ * producing non-idempotent output.
+ */
+const preserveScriptBlocksWithHubL = (input: string): string => {
+  return input.replace(
+    SCRIPT_BLOCK_WITH_HUBL_REGEX,
+    (match, offset, fullText) => {
+      if (isInsidePreserveBlock(fullText, offset)) {
+        return match;
+      }
+      const token = Token.scriptBlock(tokenIndex++);
+      tokenMap.set(token, match);
+      return token;
+    },
+  );
+};
 
 /**
  * Replaces entire `<svg>...</svg>` blocks with a placeholder before the HTML
@@ -117,6 +144,24 @@ const wrapSvgWithPreserve = (input: string): string => {
   );
 };
 
+const wrapScriptBlocksWithPreserve = (input: string): string => {
+  return input.replace(
+    SCRIPT_BLOCK_WITH_LEADING_WHITESPACE_REGEX,
+    (match, offset, fullText) => {
+      if (!match.includes("{%") && !match.includes("{{")) {
+        return match;
+      }
+      if (isInsidePreserveBlock(fullText, offset)) {
+        return match;
+      }
+      if (isInsideHubLTagStringLiteral(fullText, offset)) {
+        return match;
+      }
+      return `{% preserve %}${match}{% endpreserve %}`;
+    },
+  );
+};
+
 const tokenMap: Map<string, string> = new Map();
 const conditionalBlockTokens: Set<string> = new Set();
 let tokenIndex = 0;
@@ -152,6 +197,7 @@ const applyConditionalPreserveTokens = (input: string): string => {
 
 const tokenize = (input: string): string => {
   input = applyConditionalPreserveTokens(input);
+  input = preserveScriptBlocksWithHubL(input);
 
   const COMMENT_REGEX = /{#.*?#}/gms;
   const HUBL_TAG_REGEX = /({%.+?%})/gs;
@@ -159,7 +205,6 @@ const tokenize = (input: string): string => {
   const VARIABLE_REGEX = /({{.+?}})/gs;
   const HTML_TAG_WITH_HUBL_TAG_REGEX = /<[^>]*?(?={%|{{).*?>/gms;
   const STYLE_BLOCK_WITH_HUBL_REGEX = /<style.[^>]*?(?={%|{{).*?style>/gms;
-  const SCRIPT_BLOCK_WITH_HUBL_REGEX = /<script.[^>]*?(?={%|{{).*?script>/gms;
   const JSON_BLOCK_REGEX =
     /(?<={% widget_attribute.*is_json="?true"? %}|{% module_attribute.*is_json="?true"? %}).*?(?={%.*?end_module_attribute.*?%}|{%.*?end_widget_attribute.*?%})/gims;
 
@@ -183,23 +228,6 @@ const tokenize = (input: string): string => {
         .replace(HUBL_TAG_REGEX_WITH_LEAD, processMatch)
         .replace(COMMENT_REGEX_WITH_LEAD, processMatch)
         .replace(VARIABLE_REGEX_WITH_LEAD, processMatch);
-      input = input.replace(tag, newString);
-    });
-  }
-
-  // Replace tags in script block
-  const nestedScriptTags = input.match(SCRIPT_BLOCK_WITH_HUBL_REGEX);
-  if (nestedScriptTags) {
-    nestedScriptTags.forEach((tag) => {
-      const processMatch = (match: string) => {
-        const token = Token.nestedScript(tokenIndex++);
-        tokenMap.set(token, match);
-        return token;
-      };
-      const newString = tag
-        .replace(HUBL_TAG_REGEX, processMatch)
-        .replace(VARIABLE_REGEX, processMatch)
-        .replace(COMMENT_REGEX, processMatch);
       input = input.replace(tag, newString);
     });
   }
@@ -306,6 +334,7 @@ const parsers: Plugin["parsers"] = {
       });
       updatedText = unTokenize(updatedText);
       updatedText = wrapSvgWithPreserve(updatedText);
+      updatedText = wrapScriptBlocksWithPreserve(updatedText);
       // Find <pre> tags and add {% preserve %} wrapper
       // to tell the HubL parser to preserve formatting
       return preserveFormatting(updatedText);

@@ -1185,9 +1185,9 @@ screenshotPath: ../images/template-previews/hubdb.png
 
 {% set testing = true %}
 {# Set to false for production #}
-{% set testing_table_id = null %}
+{% set testing_table_id = none %}
 {# Set to HubDB table id (integer) #}
-{% set testing_row_id = null %}
+{% set testing_row_id = none %}
 {# Set to a HubDB table row id (integer) #}
 {% set testing_page_level = 0 %}
 {# Set to the dynamic page route level that you want to test. Set 0 for the root level page and 1 for an example of a dynamic page based on the testing_row_id #}
@@ -1266,27 +1266,20 @@ screenshotPath: ../images/template-previews/hubdb.png
 
         {% require_js %}
           <script>
-            const pageEditor = document.querySelector(
-              ".hs-inline-edit .body-container--hubdb > .content-wrapper {{ variable }}"
-            );
-            if (pageEditor) {
-              const headerNode = document.createElement("h1");
-              const headerTextNode = document.createTextNode(
-                "Error: No HubDB table has been selected."
-              );
-              headerNode.appendChild(headerTextNode);
-              pageEditor.appendChild(headerNode);
+    const pageEditor = document.querySelector('.hs-inline-edit .body-container--hubdb > .content-wrapper {{ variable }}');
+    if (pageEditor) {
+      const headerNode = document.createElement("h1");
+      const headerTextNode = document.createTextNode("Error: No HubDB table has been selected.");
+      headerNode.appendChild(headerTextNode);
+      pageEditor.appendChild(headerNode);
 
-              const linkNode = document.createElement("a");
-              const linkTextNode = document.createTextNode(
-                "Learn how to select a HubDB table"
-              );
-              linkNode.appendChild(linkTextNode);
-              linkNode.href =
-                "https://knowledge.hubspot.com/cos-general/how-to-edit-hubdb-tables";
-              pageEditor.appendChild(linkNode);
-            }
-          </script>
+      const linkNode = document.createElement('a');
+      const linkTextNode = document.createTextNode("Learn how to select a HubDB table");
+      linkNode.appendChild(linkTextNode);
+      linkNode.href = "https://knowledge.hubspot.com/cos-general/how-to-edit-hubdb-tables";
+      pageEditor.appendChild(linkNode);
+    }
+  </script>
         {% end_require_js %}
 
       {% endif %}
@@ -1422,6 +1415,39 @@ exports[`formats json.html correctly 1`] = `
       { "social_account": "twitter", "social_account": "instagram" }
     ]
   {% end_module_attribute %}
+
+`;
+
+exports[`formats json-ld-hubl-conditional.html correctly 1`] = `
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "name": "{{ siteName }}"{% if publisherName %},
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ publisherName }}"{% if publisherLogo %},
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ publisherLogo }}"
+    }{% endif %}
+  }{% endif %}
+}
+</script>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "name": "{{ siteName }}"{% if publisherName %},
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ publisherName }}"{% if publisherLogo %},
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ publisherLogo }}"
+    }{% endif %}
+  }{% endif %}
+}
+</script>
 
 `;
 
@@ -1951,7 +1977,7 @@ What is this element?
 
 {{ rel|join(" ") }}
 
-{% set testing_table_id = null %}
+{% set testing_table_id = none %}
 
 {% unless true %}
   Content
@@ -2009,13 +2035,13 @@ What is this element?
 {{ 0.100004 }}
 
 <script>
-  let module_{{ name }} = document.getElementById("hs_cos_wrapper_{{ name }}");
+    let module_{{ name }} = document.getElementById('hs_cos_wrapper_{{ name }}');
+  </script>
+<script>
+  console.log('Request: {{ request.id }}');
 </script>
 <script>
-  console.log("Request: {{ request.id }}");
-</script>
-<script>
-  let anoter_module_{{ name }} = document.getElementById("hs_cos_wrapper_{{ name }}");
+  let anoter_module_{{ name }} = document.getElementById('hs_cos_wrapper_{{ name }}');
 </script>
 
 `;
