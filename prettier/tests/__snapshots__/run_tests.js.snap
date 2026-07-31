@@ -964,6 +964,31 @@ border-radius: {{ module.styles.active.corner.radius ~ "px" }};
 
 `;
 
+exports[`formats empty-dict-literal.html correctly 1`] = `
+{% set vocabulary = {} %}
+
+{% macro HighContrastToggle(config = {}) %}
+  <button type="button">{{ config.contrastText }}</button>
+{% endmacro %}
+
+{% set hsProductsData = {
+  "header": {},
+  "productCards": []
+} %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% set vocabulary = {} %}
+
+{% macro HighContrastToggle(config={}) %}
+  <button type="button">{{ config.contrastText }}</button>
+{% endmacro %}
+
+{% set hsProductsData = {
+  "header": {},
+  "productCards": []
+} %}
+
+`;
+
 exports[`formats for.html correctly 1`] = `
 {% for key, val in request.query_dict.items() %}
 {{ key }}:{{ val }}

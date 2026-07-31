@@ -465,6 +465,9 @@ function printHubl(node) {
       ];
     }
     case "Dict": {
+      if (node.children.length === 0) {
+        return "{}";
+      }
       return group([
         "{",
         indent(

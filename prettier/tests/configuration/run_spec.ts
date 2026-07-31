@@ -97,6 +97,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "hubl-none-literal.html",
   "json-ld-hubl-conditional.html",
   "conditional-html-nested-expression.html",
+  "empty-dict-literal.html",
 ]);
 
 const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
@@ -110,6 +111,12 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
   "conditional-html-nested-expression.html": (output) => {
     expect(output).toContain("</main>");
     expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
+  },
+  "empty-dict-literal.html": (output) => {
+    expect(output).toContain("{% set vocabulary = {} %}");
+    expect(output).toMatch(/\{% macro HighContrastToggle\(config\s*=\s*\{\}\) %\}/);
+    expect(output).toMatch(/"header": \{\}/);
+    expect(output).not.toMatch(/\{\n\}/);
   },
 };
 
