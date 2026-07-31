@@ -394,6 +394,12 @@ const findPreserveEnd = (
     return findContainerCloseEnd(text, preserveStart);
   }
 
+  // The forward scan above counts balance by tag open/close alone, without
+  // regard to tag name, so it can resync to zero too early (e.g. an
+  // unrelated `<span>...</span>` inside the range closes before the actual
+  // container opened at `preserveStart` does). Re-check with the tag-name-
+  // aware `findContainerCloseEnd` and extend the range if it reaches
+  // further, so the preserved span always covers the whole container.
   const openTagMatch = text.slice(preserveStart).match(/^<([a-zA-Z][\w-]*)[^>]*>/);
   if (openTagMatch) {
     const containerCloseEnd = findContainerCloseEnd(text, preserveStart);
