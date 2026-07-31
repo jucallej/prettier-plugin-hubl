@@ -479,24 +479,24 @@ exports[`formats brackets.html correctly 1`] = `
 `;
 
 exports[`formats call-dict-indentation.html correctly 1`] = `
-<div class="blog-nav-primary-content">
-  <div class="blog-nav-logo-container">
+<div class="primary-content">
+  <div class="menu-container">
     {% call menuMacros.MenuTrigger({
-      anchorId: "blog-nav-primary-menu",
-      classExtension: "blog-nav-burger-menu"
+      anchorId: "primary-menu",
+      classExtension: "menu-trigger"
     }) %}
-    <div class="blog-nav-burger-menu-content"></div>
+    <div class="menu-trigger-content"></div>
     {% endcall %}
   </div>
 </div>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<div class="blog-nav-primary-content">
-  <div class="blog-nav-logo-container">
+<div class="primary-content">
+  <div class="menu-container">
     {% call menuMacros.MenuTrigger({
-      anchorId: "blog-nav-primary-menu",
-      classExtension: "blog-nav-burger-menu"
+      anchorId: "primary-menu",
+      classExtension: "menu-trigger"
     }) %}
-    <div class="blog-nav-burger-menu-content"></div>
+    <div class="menu-trigger-content"></div>
     {% endcall %}
   </div>
 </div>
@@ -990,26 +990,26 @@ border-radius: {{ module.styles.active.corner.radius ~ "px" }};
 `;
 
 exports[`formats empty-dict-literal.html correctly 1`] = `
-{% set vocabulary = {} %}
+{% set items = {} %}
 
-{% macro HighContrastToggle(config = {}) %}
-  <button type="button">{{ config.contrastText }}</button>
+{% macro Toggle(config = {}) %}
+  <button type="button">{{ config.text }}</button>
 {% endmacro %}
 
-{% set hsProductsData = {
+{% set data = {
   "header": {},
-  "productCards": []
+  "items": []
 } %}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-{% set vocabulary = {} %}
+{% set items = {} %}
 
-{% macro HighContrastToggle(config={}) %}
-  <button type="button">{{ config.contrastText }}</button>
+{% macro Toggle(config={}) %}
+  <button type="button">{{ config.text }}</button>
 {% endmacro %}
 
-{% set hsProductsData = {
+{% set data = {
   "header": {},
-  "productCards": []
+  "items": []
 } %}
 
 `;

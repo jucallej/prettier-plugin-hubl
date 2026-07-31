@@ -1,10 +1,10 @@
-{% set vocabulary = {} %}
+{% set items = {} %}
 
-{% macro HighContrastToggle(config = {}) %}
-  <button type="button">{{ config.contrastText }}</button>
+{% macro Toggle(config = {}) %}
+  <button type="button">{{ config.text }}</button>
 {% endmacro %}
 
-{% set hsProductsData = {
+{% set data = {
   "header": {},
-  "productCards": []
+  "items": []
 } %}

@@ -126,8 +126,8 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
     expect(callBlock).toContain(`${baseIndent}}) %}`);
   },
   "empty-dict-literal.html": (output) => {
-    expect(output).toContain("{% set vocabulary = {} %}");
-    expect(output).toMatch(/\{% macro HighContrastToggle\(config\s*=\s*\{\}\) %\}/);
+    expect(output).toContain("{% set items = {} %}");
+    expect(output).toMatch(/\{% macro Toggle\(config\s*=\s*\{\}\) %\}/);
     expect(output).toMatch(/"header": \{\}/);
     expect(output).not.toMatch(/\{\n\}/);
   },
