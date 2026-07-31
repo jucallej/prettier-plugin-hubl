@@ -24,7 +24,6 @@ function locEnd(node) {
 const Token = {
   styleValue: (index: number) => `__STYLE_VALUE${index}__`,
   styleBlock: (index: number) => `/*styleblock${index}*/`,
-  nestedScript: (index: number) => `_${index}`,
   npe: (index: number) => `npe${index}_`,
   comment: (index: number) => `<!--${index}-->`,
   placeholder: (index: number) => `<!--placeholder-${index}-->`,
