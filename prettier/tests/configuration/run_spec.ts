@@ -93,7 +93,45 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "conditional-html-wrapper-closing.html",
   "from-import-and-separator.html",
   "nested-multiline-funcall.html",
+  "module-attribute-svg-preserve.html",
+  "hubl-none-literal.html",
+  "json-ld-hubl-conditional.html",
+  "conditional-html-nested-expression.html",
+  "call-dict-indentation.html",
+  "empty-dict-literal.html",
 ]);
+
+const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
+  "module-attribute-svg-preserve.html": (output) => {
+    expect(output).not.toMatch(/\{%-?\s*(end)?preserve/i);
+  },
+  "hubl-none-literal.html": (output) => {
+    expect(output).toContain("none");
+    expect(output).not.toMatch(/\bnull\b/);
+  },
+  "conditional-html-nested-expression.html": (output) => {
+    expect(output).toContain("</main>");
+    expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
+  },
+  "call-dict-indentation.html": (output) => {
+    const callBlockMatch = output.match(
+      /(\s*)\{% call menuMacros\.MenuTrigger\(\{[\s\S]*?\}\) %\}/,
+    );
+    expect(callBlockMatch).not.toBeNull();
+    const baseIndent = callBlockMatch![1];
+    const callBlock = callBlockMatch![0];
+    const propertyIndent = `${baseIndent}  `;
+    expect(callBlock).toContain(`${propertyIndent}anchorId:`);
+    expect(callBlock).toContain(`${propertyIndent}classExtension:`);
+    expect(callBlock).toContain(`${baseIndent}}) %}`);
+  },
+  "empty-dict-literal.html": (output) => {
+    expect(output).toContain("{% set items = {} %}");
+    expect(output).toMatch(/\{% macro Toggle\(config\s*=\s*\{\}\) %\}/);
+    expect(output).toMatch(/"header": \{\}/);
+    expect(output).not.toMatch(/\{\n\}/);
+  },
+};
 
 async function run_spec(dirName, options) {
   const testObjects = fs
@@ -115,6 +153,12 @@ async function run_spec(dirName, options) {
         const firstPass = await prettyprint(input, mergedOptions);
         const secondPass = await prettyprint(firstPass, mergedOptions);
         expect(secondPass).toBe(firstPass);
+      });
+    }
+    if (REGRESSION_ASSERTIONS[fileName]) {
+      it(`formats ${fileName} with regression assertions`, async () => {
+        const output = await prettyprint(input, mergedOptions);
+        REGRESSION_ASSERTIONS[fileName](output);
       });
     }
   });

@@ -1,0 +1,30 @@
+{% block body %}
+<main>
+  <div class="wrap">
+    <div class="post">
+      {% if useSimple %}
+        {% module "header" path="/modules/header" %}
+      {% else %}
+      <div>
+        <section>
+          <h1>{{ title }}</h1>
+          {% if subtitle %}
+            <h2>{{ subtitle }}</h2>
+          {% endif %}
+        </section>
+      </div>
+      {% endif %}
+      <div class="body">
+        <div class="inner">
+          {% if showImage %}
+            {{ body|replace('</p>', '</p><div><img src="{{ image_url }}" alt="{{ alt }}" /></div>', 1) }}
+          {% else %}
+            {{ body }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% module "overlay" path="/modules/overlay" %}
+{% endblock %}

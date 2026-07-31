@@ -1,0 +1,9 @@
+<script type="application/ld+json">
+{
+  "name": "{{ name }}"{% if org %},
+  "org": {
+    "name": "{{ org }}"{% if logo %},
+    "logo": { "url": "{{ logo }}" }{% endif %}
+  }{% endif %}
+}
+</script>

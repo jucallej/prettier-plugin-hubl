@@ -375,7 +375,7 @@ function printHubl(node) {
     }
     case "Literal":
       if (node.value === null) {
-        return "null";
+        return "none";
       }
       if (typeof node.value === "string") {
         return util.makeString(node.value, '"');
@@ -465,6 +465,9 @@ function printHubl(node) {
       ];
     }
     case "Dict": {
+      if (node.children.length === 0) {
+        return "{}";
+      }
       return group([
         "{",
         indent(
@@ -585,7 +588,13 @@ function printHubl(node) {
         group([
           openTag(node.whiteSpace.openTag),
           " call ",
-          printHubl(node.args),
+          // `node.colno` is the `call` keyword's column, which sits 3
+          // characters after `{% ` (`{`, `%`, ` `). Subtracting 3 recovers
+          // the `{%`'s own column so multi-line args (e.g. a broken Dict)
+          // align with the tag itself rather than resetting to whatever
+          // ambient HubL block indent happens to be active (see the
+          // `Output` case above for the same technique with `{{ }}`).
+          align(Math.max(node.colno - 3, 0), printHubl(node.args)),
           " ",
           closeTag(node.whiteSpace.openTag),
         ]),

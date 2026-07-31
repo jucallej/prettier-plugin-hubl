@@ -1,0 +1,10 @@
+{% set items = {} %}
+
+{% macro Toggle(config = {}) %}
+  <button type="button">{{ config.text }}</button>
+{% endmacro %}
+
+{% set data = {
+  "header": {},
+  "items": []
+} %}
