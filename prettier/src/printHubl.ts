@@ -588,7 +588,7 @@ function printHubl(node) {
         group([
           openTag(node.whiteSpace.openTag),
           " call ",
-          printHubl(node.args),
+          align(Math.max(node.colno - 3, 0), printHubl(node.args)),
           " ",
           closeTag(node.whiteSpace.openTag),
         ]),

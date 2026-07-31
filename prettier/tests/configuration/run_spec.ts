@@ -97,6 +97,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "hubl-none-literal.html",
   "json-ld-hubl-conditional.html",
   "conditional-html-nested-expression.html",
+  "call-dict-indentation.html",
   "empty-dict-literal.html",
 ]);
 
@@ -111,6 +112,18 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
   "conditional-html-nested-expression.html": (output) => {
     expect(output).toContain("</main>");
     expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
+  },
+  "call-dict-indentation.html": (output) => {
+    const callBlockMatch = output.match(
+      /(\s*)\{% call menuMacros\.MenuTrigger\(\{[\s\S]*?\}\) %\}/,
+    );
+    expect(callBlockMatch).not.toBeNull();
+    const baseIndent = callBlockMatch![1];
+    const callBlock = callBlockMatch![0];
+    const propertyIndent = `${baseIndent}  `;
+    expect(callBlock).toContain(`${propertyIndent}anchorId:`);
+    expect(callBlock).toContain(`${propertyIndent}classExtension:`);
+    expect(callBlock).toContain(`${baseIndent}}) %}`);
   },
   "empty-dict-literal.html": (output) => {
     expect(output).toContain("{% set vocabulary = {} %}");

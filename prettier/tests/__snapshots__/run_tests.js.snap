@@ -478,6 +478,31 @@ exports[`formats brackets.html correctly 1`] = `
 
 `;
 
+exports[`formats call-dict-indentation.html correctly 1`] = `
+<div class="blog-nav-primary-content">
+  <div class="blog-nav-logo-container">
+    {% call menuMacros.MenuTrigger({
+      anchorId: "blog-nav-primary-menu",
+      classExtension: "blog-nav-burger-menu"
+    }) %}
+    <div class="blog-nav-burger-menu-content"></div>
+    {% endcall %}
+  </div>
+</div>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<div class="blog-nav-primary-content">
+  <div class="blog-nav-logo-container">
+    {% call menuMacros.MenuTrigger({
+      anchorId: "blog-nav-primary-menu",
+      classExtension: "blog-nav-burger-menu"
+    }) %}
+    <div class="blog-nav-burger-menu-content"></div>
+    {% endcall %}
+  </div>
+</div>
+
+`;
+
 exports[`formats comments.html correctly 1`] = `
 <div>
   {# A comment #}
