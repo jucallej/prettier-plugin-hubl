@@ -206,9 +206,6 @@ const applyConditionalPreserveTokens = (input: string): string => {
  * a `%}` sequence inside a string (e.g. `split('{% raw %}')`) is never
  * mistaken for the tag's closing delimiter. Each found tag is replaced with a
  * placeholder token and stored in `tokenMap`.
- *
- * This replaces the simpler `/{%.+?%}/gs` regex approach which would stop at
- * the first `%}` regardless of whether it was inside a string literal.
  */
 const tokenizeHublBlockTags = (input: string): string => {
   let result = "";
@@ -279,14 +276,12 @@ const tokenizeHublBlockTags = (input: string): string => {
 };
 
 const tokenize = (input: string): string => {
-  // Reset the counter here rather than when `tokenize()` returns.  Token keys
-  // must stay unique for the whole preprocess pass, and
-  // `protectMultiLineTagsWithHublPlaceholders` keeps minting
-  // `<!--conditionalblock-N-->` keys after `tokenize()` finishes.  Resetting on
-  // exit restarted that numbering at 0, so those keys collided with the ones
-  // `applyConditionalPreserveTokens` already created below, and `tokenMap.set`
-  // silently overwrote the first entry — making both occurrences expand to the
-  // same value and dropping whole blocks of markup from the output.
+  // Token keys must stay unique for the whole preprocess pass, so the counter
+  // is reset on entry and never on exit: `protectMultiLineTagsWithHublPlaceholders`
+  // keeps minting `<!--conditionalblock-N-->` keys after `tokenize()` finishes,
+  // and restarting the numbering would collide with keys already in `tokenMap`.
+  // `tokenMap.set` overwrites silently, so a collision makes both occurrences
+  // expand to the same value and drops markup from the output.
   tokenIndex = 0;
   input = applyConditionalPreserveTokens(input);
   input = preserveScriptBlocksWithHubL(input);
@@ -310,19 +305,13 @@ const tokenize = (input: string): string => {
   // excluding operators like `<=`.
   // Each alternative consumes one whole unit — a quoted attribute value, a
   // HubL block, a HubL expression, or a single ordinary character — so the
-  // first `>` that is not inside one of those units ends the match.  That
-  // keeps the match to a single tag even when the tag spans several lines.
-  //
-  // An earlier form (`[^>]*?(?={%|{{)(?:{%[\s\S]*?%}|{{[\s\S]*?}}|[^>\n])*>`)
-  // let `{{[\s\S]*?}}` span newlines, and backtracking used that to step over
-  // the tag's own `>` and run on to a `>` much later in the file.  On a
-  // multi-line `<img …/>` that swallowed 29 lines, including the following
-  // `{% endif %}` and a whole sibling `<p>` element.  Every HubL construct in
-  // the swallowed region was then tokenised as a short `npe\d+_` token instead
-  // of a 22-character `<!--placeholder-N-->` token.  The HTML formatter
-  // measures those widths when deciding where to wrap, so the same markup
-  // wrapped differently depending on whether it had been swallowed — and the
-  // output was not idempotent.
+  // first `>` that is not inside one of those units ends the match.  Every
+  // alternative must stay a complete unit: an alternation that lets `{{ … }}`
+  // span newlines can backtrack over the tag's own `>` and run on to a `>`
+  // much later in the file.  Over-matching also breaks idempotency, because
+  // HubL inside a matched tag becomes a short `npe\d+_` token while HubL
+  // outside it becomes a 22-character `<!--placeholder-N-->`, and the HTML
+  // formatter measures those widths when choosing where to wrap.
   const HTML_TAG_WITH_HUBL_TAG_REGEX =
     /(?<!['"])<(?=[a-zA-Z/!{])(?:"[^"]*"|'[^']*'|{%[\s\S]*?%}|{{[\s\S]*?}}|[^>"'])*>/gms;
   const STYLE_BLOCK_WITH_HUBL_REGEX = /<style.[^>]*?(?={%|{{).*?style>/gms;
@@ -355,8 +344,8 @@ const tokenize = (input: string): string => {
 
   // Replace expressions inside of HTML tags first.
   //
-  // The regex now matches every tag, so keep only those that actually contain
-  // HubL, and drop any match that still spans more than one tag.  A tag whose
+  // The regex matches every tag, so keep only those that actually contain
+  // HubL, and drop any match that spans more than one tag.  A tag whose
   // closing `>` is supplied by a HubL variable (`<h2{% if c %} {% endif %}{{ v }}`)
   // has no `>` of its own, so the scan continues to an unrelated `>` further
   // down.  Those are left for the line-folding pass below, which handles them
@@ -631,8 +620,8 @@ const protectMultiLineTagsWithHublPlaceholders = (input: string): string => {
     // throws, and the catch path preserves the original indentation.  Every
     // subsequent format pass then adds 2 more spaces.
     //
-    // Fix: bundle the entire element – from `<npe0_ …>` through the lone `>`
-    // that closes `</{{ tag }}>` – into one opaque conditionalBlock token.
+    // So the entire element – from `<npe0_ …>` through the lone `>` that
+    // closes `</{{ tag }}>` – is bundled into one opaque conditionalBlock token.
     // The token sits on a single line, gets wrapped in `<template>`, and is
     // normalised to column 0 by the HTML formatter.  Restoring it via
     // `{% preserve %}` makes the HubL printer output it verbatim so the
