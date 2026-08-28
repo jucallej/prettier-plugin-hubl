@@ -354,96 +354,83 @@ screenshotPath: ../images/template-previews/blog-post.png
 
 {% block body %}
   <div class="body-container body-container--blog-post">
-    {# Blog post #}
 
-    <div class="content-wrapper">
-      <article class="blog-post">
-        <h1>{{ content.name }}</h1>
-        <div class="blog-post__meta">
-          <a href="{{ blog_author_url(group.id, content.blog_post_author.slug) }}" rel="author">
-            {{ content.blog_post_author.display_name }}
-          </a>
-          <time datetime="{{ content.publish_date }}" class="blog-post__timestamp">
-            {{ content.publish_date_localized }}
-          </time>
-        </div>
-        <div class="blog-post__body">
-          {{ content.post_body }}
-        </div>
-        {% if content.tag_list %}
-          <div class="blog-post__tags">
-            {% icon
-              name="tag",
-              purpose="decorative",
-              style="SOLID" %}
-            {% for tag in content.tag_list %}
-            <a class="blog-post__tag-link" href="{{ blog_tag_url(group.id, tag.slug) }}" rel="tag"
-              >{{ tag.name }}</a
-            >{% if not loop.last %},{% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-      </article>
-      {% if group.allow_comments %}
-        <div class="blog-comments">
-          {% module "blog_comments"
-            path="@hubspot/blog_comments",
-            label="Blog comments" %}
-        </div>
-      {% endif %}
-    </div>
+{# Blog post #}
 
-    {# Recent posts listing #}
+<div class="content-wrapper">
+<article class="blog-post">
+<h1>{{ content.name }}</h1>
+<div class="blog-post__meta">
+<a href="{{ blog_author_url(group.id, content.blog_post_author.slug) }}" rel="author">
+{{ content.blog_post_author.display_name }}
+</a>
+<time datetime="{{ content.publish_date }}" class="blog-post__timestamp">
+{{ content.publish_date_localized }}
+</time>
+</div>
+<div class="blog-post__body">
+{{ content.post_body }}
+</div>
+{% if content.tag_list %}
+<div class="blog-post__tags">
+{% icon
+name="tag",
+purpose="decorative",
+style="SOLID"
+%}
+{% for tag in content.tag_list %}
+<a class="blog-post__tag-link" href="{{ blog_tag_url(group.id, tag.slug) }}" rel="tag">{{ tag.name }}</a>{% if not loop.last %},{% endif %}
+{% endfor %}
+</div>
+{% endif %}
+</article>
+{% if group.allow_comments %}
+<div class="blog-comments">
+{% module "blog_comments"
+path="@hubspot/blog_comments",
+label="Blog comments"
+%}
+</div>
+{% endif %}
+</div>
 
-    {# This macro is used to format each recent post card and gets passed to the related_blog_posts HubL tag below #}
+{# Recent posts listing #}
 
-    {% macro related_posts(post, count, total) %}
-      {% if count == 1 %}
-        <section class="blog-related-posts">
-          <div class="content-wrapper">
-            <h2>Read On</h2>
-            <div class="blog-related-posts__list">
-            {% endif %}
-            <article
-              class="blog-related-posts__post"
-              aria-label="Blog post summary: {{ post.name }}"
-            >
-              {% if post.featured_image %}
-                <a
-                  class="blog-related-posts__post-image-wrapper"
-                  href="{{ post.absolute_url }}"
-                  aria-label="{% if post.featured_image_alt_text %} Featured image: {{ post.featured_image_alt_text }} - {% endif %}Read full post: {{ post.name }}"
-                >
-                  <img
-                    class="blog-related-posts__image"
-                    src="{{ post.featured_image }}"
-                    loading="lazy"
-                    width="352"
-                    alt="{{ post.featured_image_alt_text }}"
-                  />
-                </a>
-              {% endif %}
-              <div class="blog-related-posts__content">
-                <h3 class="blog-related-posts__title">
-                  <a class="blog-related-posts__title-link" href="{{ post.absolute_url }}"
-                    >{{ post.name }}</a
-                  >
-                </h3>
-                {{ post.post_summary|truncatehtml(100) }}
-              </div>
-            </article>
-            {% if count == total %}
-            </div>
-          </div>
-        </section>
-      {% endif %}
-    {% endmacro %}
+{# This macro is used to format each recent post card and gets passed to the related_blog_posts HubL tag below #}
 
-    {% related_blog_posts
-      limit=3,
-      no_wrapper=True,
-      post_formatter="related_posts" %}
-  </div>
+{% macro related_posts(post, count, total) %}
+{% if count == 1 %}
+<section class="blog-related-posts">
+<div class="content-wrapper">
+<h2>Read On</h2>
+<div class="blog-related-posts__list">
+{% endif %}
+<article class="blog-related-posts__post" aria-label="Blog post summary: {{ post.name }}">
+{% if post.featured_image %}
+<a class="blog-related-posts__post-image-wrapper" href="{{ post.absolute_url }}" aria-label="{% if post.featured_image_alt_text %} Featured image: {{ post.featured_image_alt_text }} - {% endif %}Read full post: {{ post.name }}">
+  <img class="blog-related-posts__image" src="{{ post.featured_image }}" loading="lazy" width="352" alt="{{ post.featured_image_alt_text }}">
+</a>
+{% endif %}
+<div class="blog-related-posts__content">
+<h3 class="blog-related-posts__title">
+  <a class="blog-related-posts__title-link" href="{{ post.absolute_url }}">{{ post.name }}</a></h3>
+{{ post.post_summary|truncatehtml(100) }}
+</div>
+</article>
+{% if count == total %}
+</div>
+</div>
+</section>
+{% endif %}
+{% endmacro %}
+
+{% related_blog_posts
+limit=3,
+no_wrapper=True,
+post_formatter="related_posts"
+%}
+
+</div>
 {% endblock body %}
 
 `;
@@ -475,6 +462,37 @@ exports[`formats brackets.html correctly 1`] = `
 {{ test_object["a-hyphen"] }}
 {{ test_object.shouldBeDotted }}
 {{ test_object.should_Be_Dotted }}
+
+`;
+
+exports[`formats break-continue.html correctly 1`] = `
+{% for item in items %}
+  {% if item.id == target_id %}
+    {% set result = item %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% for item in items %}
+  {% if item.skip %}
+    {% continue %}
+  {% endif %}
+  <div>{{ item.name }}</div>
+{% endfor %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% for item in items %}
+{% if item.id == target_id %}
+  {% set result = item %}
+  {% break %}
+{% endif %}
+{% endfor %}
+
+{% for item in items %}
+{% if item.skip %}
+  {% continue %}
+{% endif %}
+<div>{{ item.name }}</div>
+{% endfor %}
 
 `;
 
@@ -622,6 +640,43 @@ templateType: none
     {{ standard_footer_includes }}
   </body>
 </html>
+
+`;
+
+exports[`formats conditional-html-elif-branches.html correctly 1`] = `
+{% if topic %}
+  <main class="listing page-width" data-testid="tag-listing">
+    <h1 class="tag-title">{{ tag }}</h1>
+    <p>Tag content</p>
+  </main>
+{% elif author %}
+  {% include '/example/templates/author.html' %}
+{% elif isLandingPage %}
+  <main class="category-listing">
+    <h1>Category</h1>
+  </main>
+{% else %}
+  <main class="listing page-width">
+    <p>Default listing content</p>
+  </main>
+{% endif %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% if topic %}
+  <main class="listing page-width" data-testid="tag-listing">
+    <h1 class="tag-title">{{ tag }}</h1>
+    <p>Tag content</p>
+  </main>
+{% elif author %}
+  {% include '/example/templates/author.html' %}
+{% elif isLandingPage %}
+  <main class="category-listing">
+    <h1>Category</h1>
+  </main>
+{% else %}
+  <main class="listing page-width">
+    <p>Default listing content</p>
+  </main>
+{% endif %}
 
 `;
 
@@ -1404,6 +1459,60 @@ screenshotPath: ../images/template-previews/hubdb.png
 
 `;
 
+exports[`formats hubl-in-tag-name-position.html correctly 1`] = `
+<main{% if not useCompactHeader %} data-monitor="landing-body"{% endif %}>
+  {% module "hero_section" path="/example/modules/hero-section" %}
+
+  {% dnd_area "content_area", class="landing-page-content" %}
+    {% dnd_section %}
+    {% end_dnd_section %}
+  {% end_dnd_area %}
+</main>
+
+<div{% if tagAttrs|first not in [' ', '>'] %} class="fallback"{% endif %}>
+  <p>content</p>
+</div>
+
+{% for segment in bodySegments %}
+  {% if not loop.first %}
+    {% set tagAttrs = segment|split(">")|first %}
+    {% if tagAttrs is string_containing 'id="' %}
+      <h2{% if tagAttrs|first not in [' ', '>'] %} {% endif %}{{ segment }}
+    {% else %}
+      <h2 id="section-{{ loop.index - 1 }}"{% if tagAttrs|first not in [' ', '>'] %} {% endif %}{{ segment }}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<main {% if not useCompactHeader %} data-monitor="landing-body" {% endif %}>
+  {% module "hero_section" path="/example/modules/hero-section" %}
+
+  {% dnd_area "content_area" class="landing-page-content" %}
+    {% dnd_section %}
+    {% end_dnd_section %}
+  {% end_dnd_area %}
+</main>
+
+<div {% if not tagAttrs|first in [ " ", ">"] %} class="fallback" {% endif %}>
+  <p>content</p>
+</div>
+
+{% for segment in bodySegments %}
+{% if not loop.first %}
+  {% set tagAttrs = segment|split(">")|first %}
+  {% if tagAttrs is string_containing("id=\\"") %}
+    <h2 {% if not tagAttrs|first in [ " ", ">"] %} {% endif %}{{ segment }}
+  {% else %}
+    <h2 id="section-{{ loop.index - 1 }}"{% if not tagAttrs|first in [
+      " ",
+      ">"
+    ] %} {% endif %}{{ segment }}
+  {% endif %}
+{% endif %}
+{% endfor %}
+
+`;
+
 exports[`formats hubl-none-literal.html correctly 1`] = `
 {% set logo = none %}
 {% set item = {
@@ -1631,6 +1740,26 @@ exports[`formats landing-page.html correctly 1`] = `
 
   {% end_dnd_area %}
 {% endblock body %}
+
+`;
+
+exports[`formats macro-multiline.html correctly 1`] = `
+{% macro short(a, b) %}{{ a }}{{ b }}{% endmacro %}
+{% macro LongMacroName(first_arg, second_arg, third_arg, show_cta=true, embed=false, powered_by=false) %}
+  <p>{{ first_arg }}</p>
+{% endmacro %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% macro short(a, b) %}{{ a }}{{ b }}{% endmacro %}
+{% macro LongMacroName(
+  first_arg,
+  second_arg,
+  third_arg,
+  show_cta=true,
+  embed=false,
+  powered_by=false
+) %}
+  <p>{{ first_arg }}</p>
+{% endmacro %}
 
 `;
 
@@ -1906,6 +2035,10 @@ What is this element?
 {% if var is string_startingwith "v" %}{% endif %}
 {% if var is string_startingwith("v") %}{% endif %}
 
+{{- content.template_path is string_containing pathFragment or content.template_path_for_render is string_containing pathFragment -}}
+{{- a is string_containing x and b is string_containing y -}}
+{{- foo is not string_containing bar or baz is string_containing qux -}}
+
 {{ foo in bar }}
 {{ foo % bar }}
 {{ foo ** bar }}
@@ -2108,6 +2241,10 @@ What is this element?
 {% if var is string_startingwith("v") %}{% endif %}
 {% if var is string_startingwith("v") %}{% endif %}
 
+{{- content.template_path is string_containing(pathFragment) or content.template_path_for_render is string_containing(pathFragment) -}}
+{{- a is string_containing(x) and b is string_containing(y) -}}
+{{- foo is not string_containing(bar) or baz is string_containing(qux) -}}
+
 {{ foo in bar }}
 {{ foo % bar }}
 {{ foo ** bar }}
@@ -2224,6 +2361,73 @@ exports[`formats nested-multiline-funcall.html correctly 1`] = `
     </div>
   </div>
 {% endif %}
+
+`;
+
+exports[`formats nested-same-tag-element-scan.html correctly 1`] = `
+{% macro Panel(i18n, language, embed=false) %}
+  {% set panel_body %}
+    <div
+      id="panel"
+      class="panel{% if not embed %} ds-card -border{% endif %}"
+      {% if not embed %}data-ds-theme="dark"
+        data-ds-background="background-01"
+      {% endif %}
+    >
+      {% set tooltip_text = i18n["tooltip_text"][language]|default("", true)|trim %}
+      {% if tooltip_text %}
+        <div class="panel-trigger-wrapper">
+          <button class="panel-info-trigger" aria-label="About this panel">
+            <svg class="panel-info-icon ds-icon" aria-hidden="true" focusable="false">
+              <use href="#ds-icon-information"></use>
+            </svg>
+          </button>
+          <div id="panel-tooltip" class="panel-tooltip ds-tooltip-container">
+            <div class="ds-card-caret -left-center">
+              <div class="panel-tooltip-content ds-tooltip-content">
+                <p>{{ tooltip_text }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      <p class="panel-subtitle ds-p">{{ i18n["subtitle"][language] }}</p>
+    </div>
+  {% endset %}
+  {{ panel_body }}
+{% endmacro %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% macro Panel(i18n, language, embed=false) %}
+  {% set panel_body %}
+    <div
+      id="panel"
+      class="panel{% if not embed %} ds-card -border{% endif %}"
+      {% if not embed %}data-ds-theme="dark"
+        data-ds-background="background-01"
+      {% endif %}
+    >
+      {% set tooltip_text = i18n["tooltip_text"][language]|default("", true)|trim %}
+      {% if tooltip_text %}
+        <div class="panel-trigger-wrapper">
+          <button class="panel-info-trigger" aria-label="About this panel">
+            <svg class="panel-info-icon ds-icon" aria-hidden="true" focusable="false">
+              <use href="#ds-icon-information"></use>
+            </svg>
+          </button>
+          <div id="panel-tooltip" class="panel-tooltip ds-tooltip-container">
+            <div class="ds-card-caret -left-center">
+              <div class="panel-tooltip-content ds-tooltip-content">
+                <p>{{ tooltip_text }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      <p class="panel-subtitle ds-p">{{ i18n["subtitle"][language] }}</p>
+    </div>
+  {% endset %}
+  {{ panel_body }}
+{% endmacro %}
 
 `;
 
@@ -4531,19 +4735,21 @@ This is a simple dialog rendered by using a macro and a call block.
   {% endif %}
   {% if number <= 2 %}
     Variable named number is less than or equal to 2.
-{% elif number <= 4 %} Variable named number
-    is less than or equal to 4.
-{% elif number <= 6 %} Variable named number is less than or equal
-    to 6.
-{% else %} Variable named number is greater than 6. {% endif %} {% image
-                                                                          "image" %} {% image
-                                                                                              "executive_image"
-                                                                                              label="Executive photo",
-                                                                                              alt="Photo of Brian Halligan",
-                                                                                              src="//cdn2.hubspot.net/hub/53/file-733888619-jpg/assets/hubspot.com/about/management/brian-home.jpg",
-                                                                                              width="300",
-                                                                                              loading="lazy" %} {% image_slider
-                                                                                                                                                                                                                                                                                                                       "image_slider" %}
+  {% elif number <= 4 %}
+    Variable named number is less than or equal to 4.
+  {% elif number <= 6 %}
+    Variable named number is less than or equal to 6.
+  {% else %}
+    Variable named number is greater than 6.
+  {% endif %}
+  {% image "image" %}
+  {% image "executive_image"
+    label="Executive photo",
+    alt="Photo of Brian Halligan",
+    src="//cdn2.hubspot.net/hub/53/file-733888619-jpg/assets/hubspot.com/about/management/brian-home.jpg",
+    width="300",
+    loading="lazy" %}
+  {% image_slider "image_slider" %}
   {% widget_block image_slider "crm_slider"
     sizing="static",
     only_thumbnails=False,
@@ -4557,23 +4763,39 @@ This is a simple dialog rendered by using a macro and a call block.
     label="Image Slider",
     loop_slides=True,
     num_seconds=5,
-    version="0" %} {% widget_attribute "slides"
-                                                                                                                                                                                                                                                                                                                  is_json=True %}[{"caption": "CRM Contacts App", "show_caption": true, "link_url":
-      "http://www.hubspot.com/crm", "alt_text": "Screenshot of CRM Contacts",
-      "img_src": "http://go.hubspot.com/hubfs/Contacts-View-1.png?t=1430860504240",
-      "open_in_new_tab": true}, {"caption": "HubSpot CRM Contact Profile",
-      "show_caption": true, "link_url": "http://www.hubspot.com/", "alt_text":
-      "HubSpot CRM Contact Profile", "img_src":
-      "http://cdn2.hubspot.net/hubfs/53/Contact-Profile.png?t=1430860504240",
-      "open_in_new_tab": true}]
-  {% end_widget_attribute %} {% end_widget_block %} {% image_src
-                                                                               "image_src" %} {% image_src
-                                                                                                           "executve_image_src"
-                                                                                                           src="//cdn2.hubspot.net/hub/53/file-733888614-jpg/assets/hubspot.com/about/management/dharmesh-home.jpg",
-                                                                                                           no_wrapper=True %} {% import "custom/page/web_page_basic/my_macros.html" as header_footer %} {{ header_footer.header("h1", "My page title") }} {{ header_footer.footer("h3", "Company footer info") }}
-  {% include "custom/page/web_page_basic/my_footer.html" %} {% include "generated_global_groups/2781996615.html" %} {% include "hubspot/styles/patches/recommended.css" %} {% inline_rich_text
-                                                                                                                                                                             "inline_rich_text"
-                                                                                                                                                                             field="my_text_field" %}
+    version="0" %}
+    {% widget_attribute "slides" is_json=True %}
+      [
+        {
+          "caption": "CRM Contacts App",
+          "show_caption": true,
+          "link_url": "http://www.hubspot.com/crm",
+          "alt_text": "Screenshot of CRM Contacts",
+          "img_src": "http://go.hubspot.com/hubfs/Contacts-View-1.png?t=1430860504240",
+          "open_in_new_tab": true
+        },
+        {
+          "caption": "HubSpot CRM Contact Profile",
+          "show_caption": true,
+          "link_url": "http://www.hubspot.com/",
+          "alt_text": "HubSpot CRM Contact Profile",
+          "img_src": "http://cdn2.hubspot.net/hubfs/53/Contact-Profile.png?t=1430860504240",
+          "open_in_new_tab": true
+        }
+      ]
+    {% end_widget_attribute %}
+  {% end_widget_block %}
+  {% image_src "image_src" %}
+  {% image_src "executve_image_src"
+    src="//cdn2.hubspot.net/hub/53/file-733888614-jpg/assets/hubspot.com/about/management/dharmesh-home.jpg",
+    no_wrapper=True %}
+  {% import "custom/page/web_page_basic/my_macros.html" as header_footer %}
+  {{ header_footer.header("h1", "My page title") }}
+  {{ header_footer.footer("h3", "Company footer info") }}
+  {% include "custom/page/web_page_basic/my_footer.html" %}
+  {% include "generated_global_groups/2781996615.html" %}
+  {% include "hubspot/styles/patches/recommended.css" %}
+  {% inline_rich_text "inline_rich_text" field="my_text_field" %}
   {% inline_rich_text "inline_rich_text"
     field="my_text_field",
     html="<p>My rich text default content</p>" %}
@@ -4830,10 +5052,12 @@ This is a simple dialog rendered by using a macro and a call block.
     no_wrapper=True %}
   {% unless x < 0 %}
     x is greater than zero
-{% endunless %} {% widget_block rich_text "my_text_block"
-                                           overrideable=True,
-                                           label="Right Column" %} {% widget_attribute
-                                                                                                                                  "html" %}
+  {% endunless %}
+
+  {% widget_block rich_text "my_text_block"
+    overrideable=True,
+    label="Right Column" %}
+    {% widget_attribute "html" %}
       <h2>Something Powerful</h2>
       <p>Some paragraph content...</p>
     {% end_widget_attribute %}

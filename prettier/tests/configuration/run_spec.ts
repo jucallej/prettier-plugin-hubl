@@ -99,6 +99,16 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "conditional-html-nested-expression.html",
   "call-dict-indentation.html",
   "empty-dict-literal.html",
+  "custom-tags.html",
+  "macro-multiline.html",
+  "conditional-html-elif-branches.html",
+  "hubl-in-tag-name-position.html",
+  "break-continue.html",
+  "unclosed-element-scan.html",
+  "tag-regex-overmatch.html",
+  "inline-block-tag-after-tag-close.html",
+  "split-closing-tag-expression.html",
+  "nested-same-tag-element-scan.html",
 ]);
 
 const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
@@ -130,6 +140,104 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
     expect(output).toMatch(/\{% macro Toggle\(config\s*=\s*\{\}\) %\}/);
     expect(output).toMatch(/"header": \{\}/);
     expect(output).not.toMatch(/\{\n\}/);
+  },
+  "misc.html": (output) => {
+    expect(output).toContain("is string_containing(pathFragment) or");
+    expect(output).not.toContain("is string_containing(pathFragment or");
+    expect(output).toContain("is string_containing(x) and");
+    expect(output).not.toContain("is string_containing(x and");
+    expect(output).toContain("is not string_containing(bar) or");
+    expect(output).not.toContain("is not string_containing(bar or");
+  },
+  "custom-tags.html": (output) => {
+    expect(output).toContain("{% my_self_closing_tag");
+    expect(output).toContain("{% my_block_tag");
+    expect(output).toContain("{% end_my_block_tag %}");
+  },
+  "macro-multiline.html": (output) => {
+    expect(output).toMatch(/{% macro LongMacroName\(\n/);
+    expect(output).toContain("  show_cta=true,");
+    expect(output).toContain("  powered_by=false");
+    expect(output).toMatch(/^\)\ %}/m);
+  },
+  "hubl-in-tag-name-position.html": (output) => {
+    // The <main> element must be preserved — not merged into an unknown
+    // element like <mainnpe0_> that would make </main> appear unexpected.
+    expect(output).toContain("<main");
+    expect(output).toContain("</main>");
+    expect(output).not.toMatch(/<main\w/);
+  },
+  "nested-same-tag-element-scan.html": (output) => {
+    // The outer `<div>` opening tag is split across lines by its conditional
+    // attributes, and its children nest more `<div>` elements.  When the
+    // element scan stops at the first `</div>` instead of the matching one, the
+    // bundled `{% preserve %}` block captures `{% if tooltip_text %}` but not
+    // its `{% endif %}`, and the HubL parser fails with
+    // "unknown block tag: endif".
+    expect(output).toContain("{% if tooltip_text %}");
+    expect(output).toContain("{% endif %}");
+    expect(output).toContain("{% endset %}");
+    expect(output).toContain("{% endmacro %}");
+    expect(output).not.toMatch(/\{%\s*preserve\s*%\}[\s\S]*\{%\s*endset\s*%\}/);
+    expect(output).not.toMatch(/<!--conditionalblock-\d+-->/);
+  },
+  "unclosed-element-scan.html": (output) => {
+    // The `<span …>` opening tag is split across lines and its closing tag is
+    // written as `</span` + a lone `>`.  When the closing tag is not matched,
+    // the element scan runs to end of file and swallows the enclosing
+    // `{% endif %}` / `{% endcall %}` into one opaque `{% preserve %}` block —
+    // the next format pass then fails with "parseIf: expected elif, else, or
+    // endif, got end of file".
+    expect(output).toContain("{% endif %}");
+    expect(output).toContain("{% endcall %}");
+    expect(output).toContain("{% endmacro %}");
+    expect(output).not.toMatch(
+      /\{%\s*preserve\s*%\}[\s\S]*\{%\s*endcall\s*%\}/,
+    );
+  },
+  "tag-regex-overmatch.html": (output) => {
+    // The tag-matching regex must stop at each tag's own `>`.  When it ran on
+    // past it, the `{% endif %}`, the sibling `<p>` and the `<a>` element were
+    // all pulled into one match and re-tokenised as short `npe` tokens, which
+    // changed the HTML formatter's wrapping decisions between passes.
+    expect(output).not.toMatch(
+      /npe\d+_|<!--(?:placeholder|comment|conditionalblock|svgblock)-\d+-->/,
+    );
+    expect(output).toContain("<img");
+    expect(output).toContain("</p>");
+    expect(output).toContain("</a>");
+    expect(output).toContain("visually-hidden");
+    expect(output.match(/{%-?\s*endif\s*-?%}/g)!.length).toBe(5);
+  },
+  "inline-block-tag-after-tag-close.html": (output) => {
+    // `{% if c %}<img …>{% endif %}` leaves the `{% endif %}` token glued to
+    // the `/>` once the HTML formatter breaks the element across lines, and the
+    // HubL printer then emitted it at column 0.
+    expect(output).not.toMatch(/^\{%\s*endif\s*%\}/m);
+    expect(output).toMatch(/^[ \t]+\{%\s*endif\s*%\}/m);
+  },
+  "split-closing-tag-expression.html": (output) => {
+    // A trailing `{{ … }}` on the `>` of a split `</span` closing tag is
+    // element content and must stay put; moving it onto its own line would be
+    // reverted by the next pass.
+    expect(output).toMatch(/>\{\{ AuthorLink\(module\.secondary_author/);
+  },
+  "conditional-html-elif-branches.html": (output) => {
+    // The preserve wrapper is an internal implementation detail and must not
+    // appear in the final output. What matters is that all branch markers and
+    // HTML elements are present and unchanged.
+    expect(output).not.toMatch(/\{%\s*preserve\s*%\}/);
+    expect(output).toContain("<main");
+    expect(output).toContain("</main>");
+    expect(output).toContain("{% if topic %}");
+    expect(output).toContain("{% elif author %}");
+    expect(output).toContain("{% elif isLandingPage %}");
+    expect(output).toContain("{% else %}");
+    expect(output).toContain("{% endif %}");
+    // All three main elements must be preserved verbatim (not merged/dropped).
+    const mainMatches = output.match(/<main\b/g);
+    expect(mainMatches).not.toBeNull();
+    expect(mainMatches!.length).toBe(3);
   },
 };
 
