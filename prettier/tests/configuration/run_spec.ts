@@ -92,6 +92,12 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "conditional-html-wrapper.html",
   "conditional-html-wrapper-closing.html",
   "from-import-and-separator.html",
+  "hubl-in-tag-name-position.html",
+  "nested-same-tag-element-scan.html",
+  "unclosed-element-scan.html",
+  "tag-regex-overmatch.html",
+  "inline-block-tag-after-tag-close.html",
+  "split-closing-tag-expression.html",
   "nested-multiline-funcall.html",
   "module-attribute-svg-preserve.html",
   "hubl-none-literal.html",
@@ -112,6 +118,44 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
   "conditional-html-nested-expression.html": (output) => {
     expect(output).toContain("</main>");
     expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
+  },
+  "hubl-in-tag-name-position.html": (output) => {
+    expect(output).toContain("<main");
+    expect(output).toContain("</main>");
+    expect(output).not.toMatch(/<main\w/);
+  },
+  "nested-same-tag-element-scan.html": (output) => {
+    expect(output).toContain("{% if tooltip_text %}");
+    expect(output).toContain("{% endif %}");
+    expect(output).toContain("{% endset %}");
+    expect(output).toContain("{% endmacro %}");
+    expect(output).not.toMatch(/\{%\s*preserve\s*%\}[\s\S]*\{%\s*endset\s*%\}/);
+    expect(output).not.toMatch(/<!--conditionalblock-\d+-->/);
+  },
+  "unclosed-element-scan.html": (output) => {
+    expect(output).toContain("{% endif %}");
+    expect(output).toContain("{% endcall %}");
+    expect(output).toContain("{% endmacro %}");
+    expect(output).not.toMatch(
+      /\{%\s*preserve\s*%\}[\s\S]*\{%\s*endcall\s*%\}/,
+    );
+  },
+  "tag-regex-overmatch.html": (output) => {
+    expect(output).not.toMatch(
+      /npe\d+_|<!--(?:placeholder|comment|conditionalblock|svgblock)-\d+-->/,
+    );
+    expect(output).toContain("<img");
+    expect(output).toContain("</p>");
+    expect(output).toContain("</a>");
+    expect(output).toContain("visually-hidden");
+    expect(output.match(/{%-?\s*endif\s*-?%}/g)!.length).toBe(5);
+  },
+  "inline-block-tag-after-tag-close.html": (output) => {
+    expect(output).not.toMatch(/^\{%\s*endif\s*%\}/m);
+    expect(output).toMatch(/^[ \t]+\{%\s*endif\s*%\}/m);
+  },
+  "split-closing-tag-expression.html": (output) => {
+    expect(output).toMatch(/>\{\{ AuthorLink\(module\.secondary_author/);
   },
   "call-dict-indentation.html": (output) => {
     const callBlockMatch = output.match(

@@ -1404,6 +1404,60 @@ screenshotPath: ../images/template-previews/hubdb.png
 
 `;
 
+exports[`formats hubl-in-tag-name-position.html correctly 1`] = `
+<main{% if not useCompactHeader %} data-monitor="landing-body"{% endif %}>
+  {% module "hero_section" path="/example/modules/hero-section" %}
+
+  {% dnd_area "content_area", class="landing-page-content" %}
+    {% dnd_section %}
+    {% end_dnd_section %}
+  {% end_dnd_area %}
+</main>
+
+<div{% if tagAttrs|first not in [' ', '>'] %} class="fallback"{% endif %}>
+  <p>content</p>
+</div>
+
+{% for segment in bodySegments %}
+  {% if not loop.first %}
+    {% set tagAttrs = segment|split(">")|first %}
+    {% if tagAttrs is string_containing 'id="' %}
+      <h2{% if tagAttrs|first not in [' ', '>'] %} {% endif %}{{ segment }}
+    {% else %}
+      <h2 id="section-{{ loop.index - 1 }}"{% if tagAttrs|first not in [' ', '>'] %} {% endif %}{{ segment }}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<main {% if not useCompactHeader %} data-monitor="landing-body" {% endif %}>
+  {% module "hero_section" path="/example/modules/hero-section" %}
+
+  {% dnd_area "content_area" class="landing-page-content" %}
+    {% dnd_section %}
+    {% end_dnd_section %}
+  {% end_dnd_area %}
+</main>
+
+<div {% if not tagAttrs|first in [ " ", ">"] %} class="fallback" {% endif %}>
+  <p>content</p>
+</div>
+
+{% for segment in bodySegments %}
+{% if not loop.first %}
+  {% set tagAttrs = segment|split(">")|first %}
+  {% if tagAttrs is string_containing("id=\\"") %}
+    <h2 {% if not tagAttrs|first in [ " ", ">"] %} {% endif %}{{ segment }}
+  {% else %}
+    <h2 id="section-{{ loop.index - 1 }}"{% if not tagAttrs|first in [
+      " ",
+      ">"
+    ] %} {% endif %}{{ segment }}
+  {% endif %}
+{% endif %}
+{% endfor %}
+
+`;
+
 exports[`formats hubl-none-literal.html correctly 1`] = `
 {% set logo = none %}
 {% set item = {
@@ -2224,6 +2278,73 @@ exports[`formats nested-multiline-funcall.html correctly 1`] = `
     </div>
   </div>
 {% endif %}
+
+`;
+
+exports[`formats nested-same-tag-element-scan.html correctly 1`] = `
+{% macro Panel(i18n, language, embed=false) %}
+  {% set panel_body %}
+    <div
+      id="panel"
+      class="panel{% if not embed %} ds-card -border{% endif %}"
+      {% if not embed %}data-ds-theme="dark"
+        data-ds-background="background-01"
+      {% endif %}
+    >
+      {% set tooltip_text = i18n["tooltip_text"][language]|default("", true)|trim %}
+      {% if tooltip_text %}
+        <div class="panel-trigger-wrapper">
+          <button class="panel-info-trigger" aria-label="About this panel">
+            <svg class="panel-info-icon ds-icon" aria-hidden="true" focusable="false">
+              <use href="#ds-icon-information"></use>
+            </svg>
+          </button>
+          <div id="panel-tooltip" class="panel-tooltip ds-tooltip-container">
+            <div class="ds-card-caret -left-center">
+              <div class="panel-tooltip-content ds-tooltip-content">
+                <p>{{ tooltip_text }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      <p class="panel-subtitle ds-p">{{ i18n["subtitle"][language] }}</p>
+    </div>
+  {% endset %}
+  {{ panel_body }}
+{% endmacro %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% macro Panel(i18n, language, embed=false) %}
+  {% set panel_body %}
+    <div
+      id="panel"
+      class="panel{% if not embed %} ds-card -border{% endif %}"
+      {% if not embed %}data-ds-theme="dark"
+        data-ds-background="background-01"
+      {% endif %}
+    >
+      {% set tooltip_text = i18n["tooltip_text"][language]|default("", true)|trim %}
+      {% if tooltip_text %}
+        <div class="panel-trigger-wrapper">
+          <button class="panel-info-trigger" aria-label="About this panel">
+            <svg class="panel-info-icon ds-icon" aria-hidden="true" focusable="false">
+              <use href="#ds-icon-information"></use>
+            </svg>
+          </button>
+          <div id="panel-tooltip" class="panel-tooltip ds-tooltip-container">
+            <div class="ds-card-caret -left-center">
+              <div class="panel-tooltip-content ds-tooltip-content">
+                <p>{{ tooltip_text }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      <p class="panel-subtitle ds-p">{{ i18n["subtitle"][language] }}</p>
+    </div>
+  {% endset %}
+  {{ panel_body }}
+{% endmacro %}
 
 `;
 
@@ -4531,19 +4652,21 @@ This is a simple dialog rendered by using a macro and a call block.
   {% endif %}
   {% if number <= 2 %}
     Variable named number is less than or equal to 2.
-{% elif number <= 4 %} Variable named number
-    is less than or equal to 4.
-{% elif number <= 6 %} Variable named number is less than or equal
-    to 6.
-{% else %} Variable named number is greater than 6. {% endif %} {% image
-                                                                          "image" %} {% image
-                                                                                              "executive_image"
-                                                                                              label="Executive photo",
-                                                                                              alt="Photo of Brian Halligan",
-                                                                                              src="//cdn2.hubspot.net/hub/53/file-733888619-jpg/assets/hubspot.com/about/management/brian-home.jpg",
-                                                                                              width="300",
-                                                                                              loading="lazy" %} {% image_slider
-                                                                                                                                                                                                                                                                                                                       "image_slider" %}
+  {% elif number <= 4 %}
+    Variable named number is less than or equal to 4.
+  {% elif number <= 6 %}
+    Variable named number is less than or equal to 6.
+  {% else %}
+    Variable named number is greater than 6.
+  {% endif %}
+  {% image "image" %}
+  {% image "executive_image"
+    label="Executive photo",
+    alt="Photo of Brian Halligan",
+    src="//cdn2.hubspot.net/hub/53/file-733888619-jpg/assets/hubspot.com/about/management/brian-home.jpg",
+    width="300",
+    loading="lazy" %}
+  {% image_slider "image_slider" %}
   {% widget_block image_slider "crm_slider"
     sizing="static",
     only_thumbnails=False,
@@ -4557,23 +4680,39 @@ This is a simple dialog rendered by using a macro and a call block.
     label="Image Slider",
     loop_slides=True,
     num_seconds=5,
-    version="0" %} {% widget_attribute "slides"
-                                                                                                                                                                                                                                                                                                                  is_json=True %}[{"caption": "CRM Contacts App", "show_caption": true, "link_url":
-      "http://www.hubspot.com/crm", "alt_text": "Screenshot of CRM Contacts",
-      "img_src": "http://go.hubspot.com/hubfs/Contacts-View-1.png?t=1430860504240",
-      "open_in_new_tab": true}, {"caption": "HubSpot CRM Contact Profile",
-      "show_caption": true, "link_url": "http://www.hubspot.com/", "alt_text":
-      "HubSpot CRM Contact Profile", "img_src":
-      "http://cdn2.hubspot.net/hubfs/53/Contact-Profile.png?t=1430860504240",
-      "open_in_new_tab": true}]
-  {% end_widget_attribute %} {% end_widget_block %} {% image_src
-                                                                               "image_src" %} {% image_src
-                                                                                                           "executve_image_src"
-                                                                                                           src="//cdn2.hubspot.net/hub/53/file-733888614-jpg/assets/hubspot.com/about/management/dharmesh-home.jpg",
-                                                                                                           no_wrapper=True %} {% import "custom/page/web_page_basic/my_macros.html" as header_footer %} {{ header_footer.header("h1", "My page title") }} {{ header_footer.footer("h3", "Company footer info") }}
-  {% include "custom/page/web_page_basic/my_footer.html" %} {% include "generated_global_groups/2781996615.html" %} {% include "hubspot/styles/patches/recommended.css" %} {% inline_rich_text
-                                                                                                                                                                             "inline_rich_text"
-                                                                                                                                                                             field="my_text_field" %}
+    version="0" %}
+    {% widget_attribute "slides" is_json=True %}
+      [
+        {
+          "caption": "CRM Contacts App",
+          "show_caption": true,
+          "link_url": "http://www.hubspot.com/crm",
+          "alt_text": "Screenshot of CRM Contacts",
+          "img_src": "http://go.hubspot.com/hubfs/Contacts-View-1.png?t=1430860504240",
+          "open_in_new_tab": true
+        },
+        {
+          "caption": "HubSpot CRM Contact Profile",
+          "show_caption": true,
+          "link_url": "http://www.hubspot.com/",
+          "alt_text": "HubSpot CRM Contact Profile",
+          "img_src": "http://cdn2.hubspot.net/hubfs/53/Contact-Profile.png?t=1430860504240",
+          "open_in_new_tab": true
+        }
+      ]
+    {% end_widget_attribute %}
+  {% end_widget_block %}
+  {% image_src "image_src" %}
+  {% image_src "executve_image_src"
+    src="//cdn2.hubspot.net/hub/53/file-733888614-jpg/assets/hubspot.com/about/management/dharmesh-home.jpg",
+    no_wrapper=True %}
+  {% import "custom/page/web_page_basic/my_macros.html" as header_footer %}
+  {{ header_footer.header("h1", "My page title") }}
+  {{ header_footer.footer("h3", "Company footer info") }}
+  {% include "custom/page/web_page_basic/my_footer.html" %}
+  {% include "generated_global_groups/2781996615.html" %}
+  {% include "hubspot/styles/patches/recommended.css" %}
+  {% inline_rich_text "inline_rich_text" field="my_text_field" %}
   {% inline_rich_text "inline_rich_text"
     field="my_text_field",
     html="<p>My rich text default content</p>" %}
@@ -4830,10 +4969,12 @@ This is a simple dialog rendered by using a macro and a call block.
     no_wrapper=True %}
   {% unless x < 0 %}
     x is greater than zero
-{% endunless %} {% widget_block rich_text "my_text_block"
-                                           overrideable=True,
-                                           label="Right Column" %} {% widget_attribute
-                                                                                                                                  "html" %}
+  {% endunless %}
+
+  {% widget_block rich_text "my_text_block"
+    overrideable=True,
+    label="Right Column" %}
+    {% widget_attribute "html" %}
       <h2>Something Powerful</h2>
       <p>Some paragraph content...</p>
     {% end_widget_attribute %}
