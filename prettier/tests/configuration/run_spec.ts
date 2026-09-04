@@ -97,6 +97,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "hubl-none-literal.html",
   "json-ld-hubl-conditional.html",
   "conditional-html-nested-expression.html",
+  "conditional-html-elif-branches.html",
   "call-dict-indentation.html",
   "empty-dict-literal.html",
 ]);
@@ -112,6 +113,19 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
   "conditional-html-nested-expression.html": (output) => {
     expect(output).toContain("</main>");
     expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
+  },
+  "conditional-html-elif-branches.html": (output) => {
+    expect(output).not.toMatch(/\{%\s*preserve\s*%\}/);
+    expect(output).toContain("<main");
+    expect(output).toContain("</main>");
+    expect(output).toContain("{% if topic %}");
+    expect(output).toContain("{% elif author %}");
+    expect(output).toContain("{% elif isLandingPage %}");
+    expect(output).toContain("{% else %}");
+    expect(output).toContain("{% endif %}");
+    const mainMatches = output.match(/<main\b/g);
+    expect(mainMatches).not.toBeNull();
+    expect(mainMatches!.length).toBe(3);
   },
   "call-dict-indentation.html": (output) => {
     const callBlockMatch = output.match(

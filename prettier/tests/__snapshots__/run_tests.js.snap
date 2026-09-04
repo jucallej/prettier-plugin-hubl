@@ -354,96 +354,83 @@ screenshotPath: ../images/template-previews/blog-post.png
 
 {% block body %}
   <div class="body-container body-container--blog-post">
-    {# Blog post #}
 
-    <div class="content-wrapper">
-      <article class="blog-post">
-        <h1>{{ content.name }}</h1>
-        <div class="blog-post__meta">
-          <a href="{{ blog_author_url(group.id, content.blog_post_author.slug) }}" rel="author">
-            {{ content.blog_post_author.display_name }}
-          </a>
-          <time datetime="{{ content.publish_date }}" class="blog-post__timestamp">
-            {{ content.publish_date_localized }}
-          </time>
-        </div>
-        <div class="blog-post__body">
-          {{ content.post_body }}
-        </div>
-        {% if content.tag_list %}
-          <div class="blog-post__tags">
-            {% icon
-              name="tag",
-              purpose="decorative",
-              style="SOLID" %}
-            {% for tag in content.tag_list %}
-            <a class="blog-post__tag-link" href="{{ blog_tag_url(group.id, tag.slug) }}" rel="tag"
-              >{{ tag.name }}</a
-            >{% if not loop.last %},{% endif %}
-            {% endfor %}
-          </div>
-        {% endif %}
-      </article>
-      {% if group.allow_comments %}
-        <div class="blog-comments">
-          {% module "blog_comments"
-            path="@hubspot/blog_comments",
-            label="Blog comments" %}
-        </div>
-      {% endif %}
-    </div>
+{# Blog post #}
 
-    {# Recent posts listing #}
+<div class="content-wrapper">
+<article class="blog-post">
+<h1>{{ content.name }}</h1>
+<div class="blog-post__meta">
+<a href="{{ blog_author_url(group.id, content.blog_post_author.slug) }}" rel="author">
+{{ content.blog_post_author.display_name }}
+</a>
+<time datetime="{{ content.publish_date }}" class="blog-post__timestamp">
+{{ content.publish_date_localized }}
+</time>
+</div>
+<div class="blog-post__body">
+{{ content.post_body }}
+</div>
+{% if content.tag_list %}
+<div class="blog-post__tags">
+{% icon
+name="tag",
+purpose="decorative",
+style="SOLID"
+%}
+{% for tag in content.tag_list %}
+<a class="blog-post__tag-link" href="{{ blog_tag_url(group.id, tag.slug) }}" rel="tag">{{ tag.name }}</a>{% if not loop.last %},{% endif %}
+{% endfor %}
+</div>
+{% endif %}
+</article>
+{% if group.allow_comments %}
+<div class="blog-comments">
+{% module "blog_comments"
+path="@hubspot/blog_comments",
+label="Blog comments"
+%}
+</div>
+{% endif %}
+</div>
 
-    {# This macro is used to format each recent post card and gets passed to the related_blog_posts HubL tag below #}
+{# Recent posts listing #}
 
-    {% macro related_posts(post, count, total) %}
-      {% if count == 1 %}
-        <section class="blog-related-posts">
-          <div class="content-wrapper">
-            <h2>Read On</h2>
-            <div class="blog-related-posts__list">
-            {% endif %}
-            <article
-              class="blog-related-posts__post"
-              aria-label="Blog post summary: {{ post.name }}"
-            >
-              {% if post.featured_image %}
-                <a
-                  class="blog-related-posts__post-image-wrapper"
-                  href="{{ post.absolute_url }}"
-                  aria-label="{% if post.featured_image_alt_text %} Featured image: {{ post.featured_image_alt_text }} - {% endif %}Read full post: {{ post.name }}"
-                >
-                  <img
-                    class="blog-related-posts__image"
-                    src="{{ post.featured_image }}"
-                    loading="lazy"
-                    width="352"
-                    alt="{{ post.featured_image_alt_text }}"
-                  />
-                </a>
-              {% endif %}
-              <div class="blog-related-posts__content">
-                <h3 class="blog-related-posts__title">
-                  <a class="blog-related-posts__title-link" href="{{ post.absolute_url }}"
-                    >{{ post.name }}</a
-                  >
-                </h3>
-                {{ post.post_summary|truncatehtml(100) }}
-              </div>
-            </article>
-            {% if count == total %}
-            </div>
-          </div>
-        </section>
-      {% endif %}
-    {% endmacro %}
+{# This macro is used to format each recent post card and gets passed to the related_blog_posts HubL tag below #}
 
-    {% related_blog_posts
-      limit=3,
-      no_wrapper=True,
-      post_formatter="related_posts" %}
-  </div>
+{% macro related_posts(post, count, total) %}
+{% if count == 1 %}
+<section class="blog-related-posts">
+<div class="content-wrapper">
+<h2>Read On</h2>
+<div class="blog-related-posts__list">
+{% endif %}
+<article class="blog-related-posts__post" aria-label="Blog post summary: {{ post.name }}">
+{% if post.featured_image %}
+<a class="blog-related-posts__post-image-wrapper" href="{{ post.absolute_url }}" aria-label="{% if post.featured_image_alt_text %} Featured image: {{ post.featured_image_alt_text }} - {% endif %}Read full post: {{ post.name }}">
+  <img class="blog-related-posts__image" src="{{ post.featured_image }}" loading="lazy" width="352" alt="{{ post.featured_image_alt_text }}">
+</a>
+{% endif %}
+<div class="blog-related-posts__content">
+<h3 class="blog-related-posts__title">
+  <a class="blog-related-posts__title-link" href="{{ post.absolute_url }}">{{ post.name }}</a></h3>
+{{ post.post_summary|truncatehtml(100) }}
+</div>
+</article>
+{% if count == total %}
+</div>
+</div>
+</section>
+{% endif %}
+{% endmacro %}
+
+{% related_blog_posts
+limit=3,
+no_wrapper=True,
+post_formatter="related_posts"
+%}
+
+</div>
 {% endblock body %}
 
 `;
@@ -622,6 +609,43 @@ templateType: none
     {{ standard_footer_includes }}
   </body>
 </html>
+
+`;
+
+exports[`formats conditional-html-elif-branches.html correctly 1`] = `
+{% if topic %}
+  <main class="listing page-width" data-testid="tag-listing">
+    <h1 class="tag-title">{{ tag }}</h1>
+    <p>Tag content</p>
+  </main>
+{% elif author %}
+  {% include '/example/templates/author.html' %}
+{% elif isLandingPage %}
+  <main class="category-listing">
+    <h1>Category</h1>
+  </main>
+{% else %}
+  <main class="listing page-width">
+    <p>Default listing content</p>
+  </main>
+{% endif %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% if topic %}
+  <main class="listing page-width" data-testid="tag-listing">
+    <h1 class="tag-title">{{ tag }}</h1>
+    <p>Tag content</p>
+  </main>
+{% elif author %}
+  {% include '/example/templates/author.html' %}
+{% elif isLandingPage %}
+  <main class="category-listing">
+    <h1>Category</h1>
+  </main>
+{% else %}
+  <main class="listing page-width">
+    <p>Default listing content</p>
+  </main>
+{% endif %}
 
 `;
 
