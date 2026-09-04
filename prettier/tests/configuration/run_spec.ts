@@ -131,6 +131,14 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
     expect(output).toMatch(/"header": \{\}/);
     expect(output).not.toMatch(/\{\n\}/);
   },
+  "misc.html": (output) => {
+    expect(output).toContain("is string_containing(pathFragment) or");
+    expect(output).not.toContain("is string_containing(pathFragment or");
+    expect(output).toContain("is string_containing(x) and");
+    expect(output).not.toContain("is string_containing(x and");
+    expect(output).toContain("is not string_containing(bar) or");
+    expect(output).not.toContain("is not string_containing(bar or");
+  },
 };
 
 async function run_spec(dirName, options) {
