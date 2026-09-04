@@ -93,6 +93,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "conditional-html-wrapper-closing.html",
   "from-import-and-separator.html",
   "nested-multiline-funcall.html",
+  "macro-multiline.html",
   "module-attribute-svg-preserve.html",
   "hubl-none-literal.html",
   "json-ld-hubl-conditional.html",
@@ -130,6 +131,12 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
     expect(output).toMatch(/\{% macro Toggle\(config\s*=\s*\{\}\) %\}/);
     expect(output).toMatch(/"header": \{\}/);
     expect(output).not.toMatch(/\{\n\}/);
+  },
+  "macro-multiline.html": (output) => {
+    expect(output).toMatch(/{% macro LongMacroName\(\n/);
+    expect(output).toContain("  show_cta=true,");
+    expect(output).toContain("  powered_by=false");
+    expect(output).toMatch(/^\)\ %}/m);
   },
 };
 
