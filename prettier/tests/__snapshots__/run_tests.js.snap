@@ -478,6 +478,37 @@ exports[`formats brackets.html correctly 1`] = `
 
 `;
 
+exports[`formats break-continue.html correctly 1`] = `
+{% for item in items %}
+  {% if item.id == target_id %}
+    {% set result = item %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% for item in items %}
+  {% if item.skip %}
+    {% continue %}
+  {% endif %}
+  <div>{{ item.name }}</div>
+{% endfor %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% for item in items %}
+{% if item.id == target_id %}
+  {% set result = item %}
+  {% break %}
+{% endif %}
+{% endfor %}
+
+{% for item in items %}
+{% if item.skip %}
+  {% continue %}
+{% endif %}
+<div>{{ item.name }}</div>
+{% endfor %}
+
+`;
+
 exports[`formats call-dict-indentation.html correctly 1`] = `
 <div class="primary-content">
   <div class="menu-container">

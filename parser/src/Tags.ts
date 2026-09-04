@@ -167,6 +167,8 @@ export default function RemoteExtension(this: RemoteExtensionContext) {
     "blog_social_sharing",
     "blog_subscribe",
     "boolean",
+    "break",
+    "continue",
     "choice",
     "comment",
     "color",
