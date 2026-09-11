@@ -83,6 +83,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "idempotent-dict-ternary.html",
   "idempotent-svg-path.html",
   "set.html",
+  "break-continue.html",
   "ternary.html",
   "regex-filters.html",
   "sliceSyntax.html",
@@ -174,6 +175,14 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
     expect(output).toMatch(/\{% macro Toggle\(config\s*=\s*\{\}\) %\}/);
     expect(output).toMatch(/"header": \{\}/);
     expect(output).not.toMatch(/\{\n\}/);
+  },
+  "misc.html": (output) => {
+    expect(output).toContain("is string_containing(pathFragment) or");
+    expect(output).not.toContain("is string_containing(pathFragment or");
+    expect(output).toContain("is string_containing(x) and");
+    expect(output).not.toContain("is string_containing(x and");
+    expect(output).toContain("is not string_containing(bar) or");
+    expect(output).not.toContain("is not string_containing(bar or");
   },
 };
 

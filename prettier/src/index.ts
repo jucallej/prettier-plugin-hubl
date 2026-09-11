@@ -1,8 +1,13 @@
 import type { Plugin } from "prettier";
 import synchronizedPrettier from "@prettier/sync";
-import { parse } from "hubl-parser";
+import { parse as hublParse } from "hubl-parser";
+import type { HublParserOptions } from "hubl-parser";
 import { findConditionalPreserveRanges } from "./conditionalHtmlPreservation.js";
 import printers from "./printHubl.js";
+
+interface PrettierHublOptions {
+  hublCustomTags?: string[];
+}
 
 const languages = [
   {
@@ -920,7 +925,24 @@ const preserveFormatting = (input: string) => {
 const parsers: Plugin["parsers"] = {
   hubl: {
     astFormat: "hubl-ast",
-    parse,
+    parse(text, options) {
+      const rawTags: string[] =
+        (options as PrettierHublOptions)?.hublCustomTags ?? [];
+      const customTags = rawTags.map((entry) => {
+        const separatorIndex = entry.indexOf(":");
+        if (separatorIndex !== -1) {
+          return {
+            name: entry.slice(0, separatorIndex),
+            endTag: entry.slice(separatorIndex + 1),
+          };
+        }
+        return { name: entry };
+      });
+      return hublParse(text, {
+        ...(options as HublParserOptions),
+        hublCustomTags: customTags,
+      });
+    },
     preprocess: (text: string) => {
       const originalText: string = text.trim();
       let updatedText: string = originalText;
@@ -1098,7 +1120,16 @@ const parsers: Plugin["parsers"] = {
   },
 };
 
-const options = {};
+const options = {
+  hublCustomTags: {
+    type: "string" as const,
+    array: true,
+    default: [{ value: [] }],
+    category: "HubL",
+    description:
+      'Additional HubL tag names to recognise. Use a plain string for self-closing tags (e.g. "my_tag") or "start:end" for block-scoped tags (e.g. "my_block:end_my_block").',
+  },
+};
 const defaultOptions = {};
 
 export { languages, printers, parsers, options, defaultOptions };
