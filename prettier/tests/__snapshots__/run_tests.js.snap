@@ -656,6 +656,43 @@ templateType: none
 
 `;
 
+exports[`formats conditional-html-elif-branches.html correctly 1`] = `
+{% if topic %}
+  <main class="listing page-width" data-testid="tag-listing">
+    <h1 class="tag-title">{{ tag }}</h1>
+    <p>Tag content</p>
+  </main>
+{% elif author %}
+  {% include '/example/templates/author.html' %}
+{% elif isLandingPage %}
+  <main class="category-listing">
+    <h1>Category</h1>
+  </main>
+{% else %}
+  <main class="listing page-width">
+    <p>Default listing content</p>
+  </main>
+{% endif %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% if topic %}
+  <main class="listing page-width" data-testid="tag-listing">
+    <h1 class="tag-title">{{ tag }}</h1>
+    <p>Tag content</p>
+  </main>
+{% elif author %}
+  {% include '/example/templates/author.html' %}
+{% elif isLandingPage %}
+  <main class="category-listing">
+    <h1>Category</h1>
+  </main>
+{% else %}
+  <main class="listing page-width">
+    <p>Default listing content</p>
+  </main>
+{% endif %}
+
+`;
+
 exports[`formats conditional-html-nested-expression.html correctly 1`] = `
 {% block body %}
 <main>

@@ -98,8 +98,10 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "hubl-none-literal.html",
   "json-ld-hubl-conditional.html",
   "conditional-html-nested-expression.html",
+  "conditional-html-elif-branches.html",
   "call-dict-indentation.html",
   "empty-dict-literal.html",
+  "blog-post.html",
 ]);
 
 const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
@@ -113,6 +115,39 @@ const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
   "conditional-html-nested-expression.html": (output) => {
     expect(output).toContain("</main>");
     expect(output).not.toMatch(/<!--conditionalblock-\d+-->\s*<\/main>/);
+  },
+  "conditional-html-elif-branches.html": (output) => {
+    expect(output).not.toMatch(/\{%\s*preserve\s*%\}/);
+    expect(output).toContain("<main");
+    expect(output).toContain("</main>");
+    expect(output).toContain("{% if topic %}");
+    expect(output).toContain("{% elif author %}");
+    expect(output).toContain("{% elif isLandingPage %}");
+    expect(output).toContain("{% else %}");
+    expect(output).toContain("{% endif %}");
+    const mainMatches = output.match(/<main\b/g);
+    expect(mainMatches).not.toBeNull();
+    expect(mainMatches!.length).toBe(3);
+  },
+  "blog-post.html": (output) => {
+    // This template pairs `{% if count == 1 %}` opening three wrappers with a
+    // later `{% if count == total %}` closing them. Treating either as a
+    // preserve candidate swallows the whole body and emits it at column 0.
+    const indentOf = (trimmedLine: string): number => {
+      const line = output
+        .split("\n")
+        .find((candidate) => candidate.trim() === trimmedLine);
+      expect(line).toBeDefined();
+      return line!.length - line!.trimStart().length;
+    };
+    expect(
+      indentOf('<div class="body-container body-container--blog-post">'),
+    ).toBe(2);
+    expect(indentOf('<div class="content-wrapper">')).toBe(4);
+    expect(indentOf('<article class="blog-post">')).toBe(6);
+    expect(indentOf("<h1>{{ content.name }}</h1>")).toBe(8);
+    expect(indentOf('<section class="blog-related-posts">')).toBe(8);
+    expect(output).not.toMatch(/\{%-?\s*(end)?preserve/i);
   },
   "call-dict-indentation.html": (output) => {
     const callBlockMatch = output.match(
