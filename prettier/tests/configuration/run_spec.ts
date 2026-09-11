@@ -83,6 +83,7 @@ const IDEMPOTENCY_FIXTURES = new Set([
   "idempotent-dict-ternary.html",
   "idempotent-svg-path.html",
   "set.html",
+  "break-continue.html",
   "ternary.html",
   "regex-filters.html",
   "sliceSyntax.html",
