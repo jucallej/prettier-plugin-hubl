@@ -495,7 +495,7 @@ function printHubl(node) {
           " ",
           closeTag(node.whiteSpace.openTag),
         ]),
-        printHubl(node.body),
+        indent(printBody(node.body)),
         openTag(node.whiteSpace.closingTag),
         " endfor ",
         closeTag(node.whiteSpace.closingTag),
@@ -598,7 +598,7 @@ function printHubl(node) {
           " ",
           closeTag(node.whiteSpace.openTag),
         ]),
-        printHubl(node.body),
+        indent(printBody(node.body)),
         group([
           openTag(node.whiteSpace.closingTag),
           " endcall ",

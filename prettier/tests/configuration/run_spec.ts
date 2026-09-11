@@ -80,6 +80,7 @@ function createTestObject(
 }
 
 const IDEMPOTENCY_FIXTURES = new Set([
+  "nested-call-for-indentation.html",
   "idempotent-dict-ternary.html",
   "idempotent-svg-path.html",
   "set.html",
@@ -103,6 +104,22 @@ const IDEMPOTENCY_FIXTURES = new Set([
 ]);
 
 const REGRESSION_ASSERTIONS: Record<string, (output: string) => void> = {
+  "nested-call-for-indentation.html": (output) => {
+    const indentOf = (trimmedLine: string): number => {
+      const line = output
+        .split("\n")
+        .find((candidate) => candidate.trim() === trimmedLine);
+      expect(line).toBeDefined();
+      return line!.length - line!.trimStart().length;
+    };
+    expect(indentOf("{% call OuterSection({")).toBe(0);
+    expect(indentOf("{% call InnerTabs({")).toBe(2);
+    expect(indentOf("{% for tab in tabs_array %}")).toBe(4);
+    expect(indentOf('<div class="widget__card">')).toBe(6);
+    expect(indentOf("{% for item in tab_data.items %}")).toBe(8);
+    expect(indentOf("<p>{{ item.value }}</p>")).toBe(10);
+    expect(indentOf("{% endcall %}")).toBe(2);
+  },
   "module-attribute-svg-preserve.html": (output) => {
     expect(output).not.toMatch(/\{%-?\s*(end)?preserve/i);
   },
