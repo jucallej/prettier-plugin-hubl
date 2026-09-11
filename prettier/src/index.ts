@@ -841,23 +841,26 @@ const protectMultiLineTagsWithHublPlaceholders = (input: string): string => {
  * This function scans attribute values that span multiple lines and replaces
  * arbitrary leading whitespace on continuation lines that contain an `npe_`
  * token with a two-space indent relative to the attribute-opening line.
+ *
+ * Both quote styles are handled. The opening quote is captured and matched
+ * back with `\3`, so the value may freely contain the other quote character.
  */
 const normalizeNpeAttributeContinuationLines = (input: string): string => {
   const NPE_CONTINUATION_RE =
-    /^([ \t]*)(\S[^=\n]*?=")([^"]*(?:npe\d+_[^"]*\n[ \t]*)+[^"]*)"(.*)/gm;
+    /^([ \t]*)(\S[^=\n]*?=(["']))((?:(?!\3)[\s\S])*(?:npe\d+_(?:(?!\3)[\s\S])*\n[ \t]*)+(?:(?!\3)[\s\S])*)\3(.*)/gm;
 
   return input.replace(
     NPE_CONTINUATION_RE,
-    (match, indent, attrOpener, rawValue, tail) => {
+    (match, indent, attrOpener, quote, rawValue, tail) => {
       const canonicalContinuationIndent = indent + "  ";
       const normalizedValue = rawValue.replace(
         /^[ \t]+/gm,
-        (spaces, offset) => {
+        (spaces: string, offset: number) => {
           if (offset === 0) return spaces;
           return canonicalContinuationIndent;
         },
       );
-      return `${indent}${attrOpener}${normalizedValue}"${tail}`;
+      return `${indent}${attrOpener}${normalizedValue}${quote}${tail}`;
     },
   );
 };
@@ -893,6 +896,11 @@ const unTokenize = (input: string) => {
   // container revealed by another container is still resolved; without this a
   // raw token such as `npe12_` can survive into the formatted output.
   const entries = Array.from(tokenMap.entries()).reverse();
+  // Each pass resolves one more level of container nesting and the loop exits
+  // as soon as a pass changes nothing, so real templates finish in one or two.
+  // The cap is an arbitrary guard against a pathological chain rather than a
+  // measured limit. Raise it if a template ever nests containers more deeply;
+  // the symptom is a raw `npe\d+_` or `<!--placeholder-N-->` in the output.
   const MAX_PASSES = 10;
   for (let pass = 0; pass < MAX_PASSES; pass++) {
     let replacedAny = false;
@@ -1006,20 +1014,25 @@ const parsers: Plugin["parsers"] = {
           trailingComma: "es5",
         });
       } catch {
-        // HTML formatting failed (e.g. a `<tag{% if %}...{{ var }}` pattern
-        // with no literal `>` makes parse5 receive `<tag <!--placeholder-->`,
-        // which is invalid, or mismatched close tags like <footer>...</div>
-        // which parse5/Prettier rejects). Strip the block-level wrappers we added
-        // before the attempt and de-indent every standalone placeholder line to
-        // column 0 so that the HubL printer's own `indent()` calls produce
-        // the correct 2-space nesting.
+        // Known inputs that land here, all of them rejected by parse5:
         //
-        // We also strip the minimum common leading indentation from all
-        // non-empty, non-placeholder content lines (the raw HTML). Without
-        // this, any pre-existing source indentation (e.g. 10 spaces because
-        // the HTML lives inside a {% if %} block) is preserved verbatim; the
-        // HubL printer's indent() then adds 2 more spaces on every subsequent
-        // pass, causing non-idempotent indentation growth.
+        //   - the element's `>` comes from HubL, e.g. `<h2{{ attrs }}>`, so
+        //     parse5 receives the unterminated `<h2 <!--placeholder-0-->`
+        //   - HubL sits in tag-name position, e.g. `<{{ tag }} class="x">`
+        //     (fixture: hubl-in-tag-name-position.html)
+        //   - an element is opened and closed by different tag names, e.g.
+        //     `<footer>` … `</div>` split across `{% if %}` branches
+        //
+        // The recovery is deliberately heavy because the HubL printer now has
+        // to produce correctly indented output from text the HTML formatter
+        // never touched. Everything below exists to get the input back to a
+        // zero-indent baseline: the wrappers added for the attempt are
+        // removed, standalone placeholder lines and the raw HTML content are
+        // de-indented to column 0, and stored SVG token values are flattened.
+        // Leaving source indentation in place anywhere (e.g. 10 spaces because
+        // the HTML lives inside an `{% if %}`) means the printer's `indent()`
+        // adds 2 more spaces on top of it every pass — the growth that makes
+        // `prettier --check` fail right after `prettier --write` succeeded.
         updatedText = updatedText.replace(
           /<template data-hubl-block>(<!--(?:placeholder|comment|conditionalblock)-\d+-->|npe\d+_)<\/template>/g,
           "$1",
