@@ -133,9 +133,7 @@ const stripHubLExpressions = (fragment: string): string => {
 /** Removes HubL syntax so only literal HTML remains for tag-balance counting. */
 const stripHubL = (fragment: string): string =>
   stripHubLExpressions(
-    fragment
-      .replace(HUBL_BLOCK_TAG_REGEX, "")
-      .replace(HUBL_COMMENT_REGEX, ""),
+    fragment.replace(HUBL_BLOCK_TAG_REGEX, "").replace(HUBL_COMMENT_REGEX, ""),
   );
 
 /**
@@ -353,7 +351,11 @@ const findContainerCloseEnd = (text: string, openStart: number): number => {
 
     if (
       !VOID_HTML_ELEMENTS.has(tagName) &&
-      !(tag.startsWith("<") && !tag.startsWith("</") && isSelfClosingHtmlTag(tag))
+      !(
+        tag.startsWith("<") &&
+        !tag.startsWith("</") &&
+        isSelfClosingHtmlTag(tag)
+      )
     ) {
       if (tag.startsWith("</") && tagName === rootTag) {
         depth--;
@@ -429,7 +431,11 @@ const findPreserveEnd = (
 
       if (
         !VOID_HTML_ELEMENTS.has(tagName) &&
-        !(tag.startsWith("<") && !tag.startsWith("</") && isSelfClosingHtmlTag(tag))
+        !(
+          tag.startsWith("<") &&
+          !tag.startsWith("</") &&
+          isSelfClosingHtmlTag(tag)
+        )
       ) {
         if (tag.startsWith("</")) {
           balance--;
@@ -455,7 +461,9 @@ const findPreserveEnd = (
   // container opened at `preserveStart` does). Re-check with the tag-name-
   // aware `findContainerCloseEnd` and extend the range if it reaches
   // further, so the preserved span always covers the whole container.
-  const openTagMatch = text.slice(preserveStart).match(/^<([a-zA-Z][\w-]*)[^>]*>/);
+  const openTagMatch = text
+    .slice(preserveStart)
+    .match(/^<([a-zA-Z][\w-]*)[^>]*>/);
   if (openTagMatch) {
     const containerCloseEnd = findContainerCloseEnd(text, preserveStart);
     if (containerCloseEnd > index) {
@@ -496,7 +504,8 @@ const mergeOverlappingRanges = (ranges: TextRange[]): TextRange[] => {
  *
  * 1. **Unbalanced branch** — any single branch has a non-zero net HTML tag
  *    balance (more opens than closes, or vice-versa). This is the classic
- *    split-wrapper pattern: `{% if %}<div>{% else %}</div>{% endif %}`.
+ *    split-wrapper pattern: `{% if %}<div>{% else %}</div>{% endif %}`. Only
+ *    blocks with two or more branches qualify; see below.
  *
  * 2. **Duplicate top-level element** — the same HTML element type appears as
  *    a top-level element in two or more branches. When flattened, all branches
@@ -527,7 +536,14 @@ export const findConditionalPreserveRanges = (
     );
     const branchBalances = branchTexts.map(getHtmlTagBalance);
 
-    const hasUnbalancedBranch = branchBalances.some((balance) => balance !== 0);
+    // A lone {% if %}...{% endif %} is excluded: templates routinely open a
+    // wrapper element in one such block and close it in a separate later one,
+    // and the HTML formatter flattens that correctly. Preserving it would
+    // anchor the range at the outermost unclosed element, which can swallow
+    // most of the template and emit it verbatim and unindented.
+    const hasUnbalancedBranch =
+      block.branches.length > 1 &&
+      branchBalances.some((balance) => balance !== 0);
 
     // Check #2 only for blocks with an {% else %} branch (two or more branches).
     // A lone {% if %}...{% endif %} with balanced content is always safe.
