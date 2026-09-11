@@ -465,6 +465,37 @@ exports[`formats brackets.html correctly 1`] = `
 
 `;
 
+exports[`formats break-continue.html correctly 1`] = `
+{% for item in items %}
+  {% if item.id == target_id %}
+    {% set result = item %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% for item in items %}
+  {% if item.skip %}
+    {% continue %}
+  {% endif %}
+  <div>{{ item.name }}</div>
+{% endfor %}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% for item in items %}
+{% if item.id == target_id %}
+  {% set result = item %}
+  {% break %}
+{% endif %}
+{% endfor %}
+
+{% for item in items %}
+{% if item.skip %}
+  {% continue %}
+{% endif %}
+<div>{{ item.name }}</div>
+{% endfor %}
+
+`;
+
 exports[`formats call-dict-indentation.html correctly 1`] = `
 <div class="primary-content">
   <div class="menu-container">
@@ -1930,6 +1961,10 @@ What is this element?
 {% if var is string_startingwith "v" %}{% endif %}
 {% if var is string_startingwith("v") %}{% endif %}
 
+{{- content.template_path is string_containing pathFragment or content.template_path_for_render is string_containing pathFragment -}}
+{{- a is string_containing x and b is string_containing y -}}
+{{- foo is not string_containing bar or baz is string_containing qux -}}
+
 {{ foo in bar }}
 {{ foo % bar }}
 {{ foo ** bar }}
@@ -2131,6 +2166,10 @@ What is this element?
 
 {% if var is string_startingwith("v") %}{% endif %}
 {% if var is string_startingwith("v") %}{% endif %}
+
+{{- content.template_path is string_containing(pathFragment) or content.template_path_for_render is string_containing(pathFragment) -}}
+{{- a is string_containing(x) and b is string_containing(y) -}}
+{{- foo is not string_containing(bar) or baz is string_containing(qux) -}}
 
 {{ foo in bar }}
 {{ foo % bar }}
