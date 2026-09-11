@@ -19,23 +19,23 @@ exports[`formats inline-block-tag-after-tag-close.html correctly 1`] = `
 <form class="newsletter-signup-form">
   <fieldset class="newsletter-signup-form-categories">
     {% for category in categories %}
-    <li class="newsletter-signup-form-category">
-      <div class="newsletter-signup-form-category-card ds-card">
-        {% if category.icon.src %}<img
-            class="newsletter-signup-form-category-card-image"
-            src="{{ category.icon.src }}"
-            alt=""
-          />
-        {% endif %}
-        <span>
-          <label
-            class="newsletter-signup-form-category-card-title"
-            for="option-{{ category.option_id }}"
-            >{{ category.display_label }}</label
-          >
-        </span>
-      </div>
-    </li>
+      <li class="newsletter-signup-form-category">
+        <div class="newsletter-signup-form-category-card ds-card">
+          {% if category.icon.src %}<img
+              class="newsletter-signup-form-category-card-image"
+              src="{{ category.icon.src }}"
+              alt=""
+            />
+          {% endif %}
+          <span>
+            <label
+              class="newsletter-signup-form-category-card-title"
+              for="option-{{ category.option_id }}"
+              >{{ category.display_label }}</label
+            >
+          </span>
+        </div>
+      </li>
     {% endfor %}
   </fieldset>
 </form>
@@ -123,28 +123,28 @@ exports[`formats tag-regex-overmatch.html correctly 1`] = `
    tokenised as short npe tokens rather than placeholder comment tokens, and
    the differing token widths change where the HTML formatter wraps. #}
 {% for card in cards %}
-<div class="quote-list-card-author">
-  {% if card.author_avatar.src %}
-    <img
-      class="quote-list-card-avatar"
-      src="{{ resize_image_url(card.author_avatar.src, 32, 32) }}"
-      width="32"
-      height="32"
-      alt="{{ card.author_avatar.alt or card.author_name }}"
-      loading="lazy"
-    />
-  {% endif %}
-  <p class="quote-list-card-author-name ds-p -microheading">
-    {{ card.author_name }}{% if card.author_title %}
-      ({{ card.author_title }}){% endif %}
-  </p>
-</div>
-{% if card.url.url.href %}
-  {% set card_link_rel = [
-    card.url.open_in_new_tab ? "noopener noreferrer" : "",
-    card.url.no_follow ? "nofollow" : ""
-  ]|select("truthy")|join(" ") %}
-  <a
+  <div class="quote-list-card-author">
+    {% if card.author_avatar.src %}
+      <img
+        class="quote-list-card-avatar"
+        src="{{ resize_image_url(card.author_avatar.src, 32, 32) }}"
+        width="32"
+        height="32"
+        alt="{{ card.author_avatar.alt or card.author_name }}"
+        loading="lazy"
+      />
+    {% endif %}
+    <p class="quote-list-card-author-name ds-p -microheading">
+      {{ card.author_name }}{% if card.author_title %}
+        ({{ card.author_title }}){% endif %}
+    </p>
+  </div>
+  {% if card.url.url.href %}
+    {% set card_link_rel = [
+      card.url.open_in_new_tab ? "noopener noreferrer" : "",
+      card.url.no_follow ? "nofollow" : ""
+    ]|select("truthy")|join(" ") %}
+    <a
       class="quote-list-card-link"
       href="{{ card.url.url.href }}"
       {% if card.url.open_in_new_tab %}
@@ -155,7 +155,7 @@ exports[`formats tag-regex-overmatch.html correctly 1`] = `
     >
       <span class="visually-hidden">{{ card.description }}</span>
     </a>
-{% endif %}
+  {% endif %}
 {% endfor %}
 
 `;
@@ -178,14 +178,14 @@ exports[`formats unclosed-element-scan.html correctly 1`] = `
   {% call SectionWrapper({
     tag_name: "section"
   }) %}
-  {% if updatedDate %}
-    <div class="meta-item -updated">
-      <span
+    {% if updatedDate %}
+      <div class="meta-item -updated">
+        <span
           >{{ strings.updated[lang] }}:
           <time datetime="{{ updatedDate|datetimeformat('%Y-%m-%d') }}">{{ prettyDate }}</time></span
         >
-    </div>
-  {% endif %}
+      </div>
+    {% endif %}
   {% endcall %}
 {% endmacro %}
 
