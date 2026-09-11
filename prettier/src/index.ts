@@ -830,42 +830,6 @@ const protectMultiLineTagsWithHublPlaceholders = (input: string): string => {
 };
 
 /**
- * Normalizes the leading indentation of continuation lines inside multi-line
- * HTML attribute values that contain `npe_N_` placeholder tokens.
- *
- * The HTML formatter treats attribute value strings as opaque text, so the
- * literal whitespace on those continuation lines is never re-normalized.
- * That means every pass through the HubL printer's `indent()` wrapper adds
- * more leading spaces, producing non-idempotent output.
- *
- * This function scans attribute values that span multiple lines and replaces
- * arbitrary leading whitespace on continuation lines that contain an `npe_`
- * token with a two-space indent relative to the attribute-opening line.
- *
- * Both quote styles are handled. The opening quote is captured and matched
- * back with `\3`, so the value may freely contain the other quote character.
- */
-const normalizeNpeAttributeContinuationLines = (input: string): string => {
-  const NPE_CONTINUATION_RE =
-    /^([ \t]*)(\S[^=\n]*?=(["']))((?:(?!\3)[\s\S])*(?:npe\d+_(?:(?!\3)[\s\S])*\n[ \t]*)+(?:(?!\3)[\s\S])*)\3(.*)/gm;
-
-  return input.replace(
-    NPE_CONTINUATION_RE,
-    (match, indent, attrOpener, quote, rawValue, tail) => {
-      const canonicalContinuationIndent = indent + "  ";
-      const normalizedValue = rawValue.replace(
-        /^[ \t]+/gm,
-        (spaces: string, offset: number) => {
-          if (offset === 0) return spaces;
-          return canonicalContinuationIndent;
-        },
-      );
-      return `${indent}${attrOpener}${normalizedValue}${quote}${tail}`;
-    },
-  );
-};
-
-/**
  * Expands a single token to the text that should replace it, applying the
  * `{% preserve %}` wrapping strategy recorded for that token.
  *
@@ -993,15 +957,6 @@ const parsers: Plugin["parsers"] = {
         /^([ \t]*)(<!--(?:placeholder|comment|conditionalblock)-\d+-->|npe\d+_)[ \t]*$/gm,
         "$1<template data-hubl-block>$2</template>",
       );
-      // Normalize the leading indentation of continuation lines inside
-      // multi-line attribute values that contain npe_ tokens.  The HTML
-      // formatter treats attribute value strings as opaque, so the literal
-      // indentation of those lines is preserved unchanged.  That means each
-      // pass through the HubL printer's indent() adds more spaces, causing
-      // non-idempotent growth.  We canonicalize those lines to a fixed
-      // two-space indent relative to the attribute-opening line so that the
-      // formatter output is stable across passes.
-      updatedText = normalizeNpeAttributeContinuationLines(updatedText);
       // Parse and format HTML.
       // Some templates build HTML dynamically (e.g.
       // `<h2{{ variable }}>` where the variable contains the closing `>`), which
